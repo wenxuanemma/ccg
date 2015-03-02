@@ -410,6 +410,47 @@ that time point. More specifically, at time $t$, to $P$ if a link $l$
 any packet's view of the network is consistent with the uncertainty-aware model.
 \end{theorem}
   \vspace{-0.1in}
+  \vspace{-0.1in}
+\begin{proof} Without loss of generality, assume that the maximum duration of a
+packet in the network is $\delta$, which is set as the amount of delay added to
+confirmations.  Consider a packet $P$ that enters the network at time $t_1$ and
+leaves at $t_2$ ($t_2-t_1 \le \delta$).  Assume that $P$ traverses the network in
+$n$ hops, and when $n=0$, $P$ enters the network.  Clearly the theorem holds for
+$n=0$.  Consider hop $k, (k \ge 0\mbox{ and } k \le n)$.  By induction, at
+hop $(k-1)$, assume that $P$'s view is consistent with the model.
+
+If $P$ encounters a forwarding link at hop $k$, then there exist two cases.
+In case 1, the corresponding forwarding rule is intentionally inserted by the
+controller, and by the time $P$ reaches hop $k$, the rule is installed.  In case
+2, the rule is about to be removed, but the action is not done until $P$ has been
+handled by the rule.  Let $t_i$ denote the time of issuing the related command (to add or
+remove the rule), and $t_c$ the time it is confirmed at the controller as.  
+In case 1, since $P$ reaches the link, $t_i < t$.  In the model, that
+link is modeled as either certain ($t_c \le t$) or uncertain ($t_c > t$).  In
+case 2, because the link is reachable to $P$ at $t$, in $P$'s lifetime $[t_1,
+t_2]$, $P$'s view of the network state contains that link.  $t_c$ cannot be
+earlier than $t$, because if it were, $P$ could not reach the link.  Because of the delayed
+confirmation mechanism, if an update $u$ causes the removal of the link, the
+status of the rule remains as uncertain for an extra $\delta$ time in the model
+until $t_c + \delta > t_2$, which is consistent with $P$'s view.  
+%(even if the
+%acknowledgement of applying $u$ reaches the controller at $T_c$ before $t_2$).
+In particular, if $t_i \ge t$, then the link is included as certain in the model
+until the update is issued ($t_i$).
+
+If $P$ reaches a location where no forwarding rule is available, there are also
+two cases.  In case 1, some forwarding rules have been issued to handle $P$ at this
+location, but they have not been applied yet. In case 2, there had been available rules, but
+they were removed before $t$.  In case 1, $t_c$ is definitely later than $t$.
+If it weren't, the rule would be there by $t$.  If $t_i < t$, at $t$, the forwarding rule
+is only modeled as uncertain.  If $t_i \ge t$, at $t$, the model does not
+contain that rule.  In case 2, the removal of the rules is issued before $t$.
+In the interval $[t_i, t_c + \delta]$, any rule $R$ is modeled as uncertain,
+and after the interval, $R$ is removed from the model, after $P$ leaves the
+network.  Hence, the model is consistent with the view of $P$ during its
+lifetime in the network.
+\end{proof}
+
 %Note that in practice, only {\em certain} and {\em uncertain} two states are not sufficient (e.g., whether to mark a link as certain can depend on subsequent updates), but we here skip the details.
 %\footnote{This theorem is proved in a technical report that has been mailed to the program committee chairs.}
 
