@@ -1,0 +1,165 @@
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{usenix,epsfig,endnotes}
+\usepackage{cite}
+\usepackage{amsfonts,amsmath, amsthm}
+\usepackage{xspace}
+\usepackage{pifont}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{multirow}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+
+\usepackage{authblk}
+%\usepackage{diagbox}
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{fact}{Fact}
+\newtheorem{proposition}{Proposition}
+\newtheorem{claim}{Claim}
+
+\usepackage{wrapfig}
+\usepackage{graphicx}
+%\usepackage[pdftex]{color} % Force PDF output
+\usepackage{caption}
+
+%\usepackage[margin=1in]{geometry}
+\usepackage{fancybox}
+\usepackage{calc}
+\usepackage{url}
+\usepackage[hang,scriptsize,tight,nooneline]{subfigure}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+%\usepackage{algorithmic}
+\usepackage{booktabs}
+\usepackage{times}
+\usepackage{enumitem}
+\makeatletter
+\makeatother
+
+\usepackage[compact]{titlesec}
+
+\pdfpagewidth=8.5 true in
+\pdfpageheight=11 true in
+
+%\newcommand{\paragraphb}[1]{\vspace{0.03in}\noindent{\bf #1} }
+% Give more separation for now ... we might tighten it up later
+\newcommand{\paragraphb}[1]{\smallskip{}\noindent{\bf #1} }
+\newcommand{\paragraphe}[1]{\vspace{0.03in}\noindent{\em #1} }
+
+\newcommand{\pbg}[1]{{\color{Green}#1}}
+\newcommand{\pbgc}[1]{{\color{Green}\bf\em{[pbg: #1]}}}
+
+%\newcommand{\matt}[1]{{\color{blue}{#1}}} 
+\newcommand{\matt}[1]{{{#1}}} 
+%\newcommand{\mattc}[1]{{\color{blue}\bf\em{[matt: #1]}}} 
+\newcommand{\mattc}[1]{{}} 
+
+%\newcommand{\wxzcr}[1]{{\color{Purple}{#1}}} 
+\newcommand{\wxzcr}[1]{{{#1}}} 
+\newcommand{\wxznew}[1]{{{#1}}} 
+\newcommand{\wxz}[1]{{{#1}}} 
+%\newcommand{\wxzc}[1]{{\color{Purple}\bf\em{[wxz: #1]}}} 
+\newcommand{\wxzc}[1]{{}} 
+
+%\newcommand{\kevin}[1]{{\color{red}{#1}}} 
+\newcommand{\kevin}[1]{{{#1}}} 
+%\newcommand{\kevinc}[1]{{\color{red}\bf\em{[kevin: #1]}}} 
+\newcommand{\kevinc}[1]{{}} 
+
+% http://en.wikibooks.org/wiki/LaTeX/Colors
+
+\newcommand{\cut}[1]{}
+% To make the FIXMEs go away, comment out this line...
+\newcommand{\fixme}[1]{{\bf\textcolor{red}{[#1]}}}
+% ...and uncomment this one.
+%\newcommand{\fixme}[1]{}
+
+\newcommand{\parheading}[1]{\medskip{} \noindent \textbf{#1}}
+
+\newcommand{\name}{$CCG$\xspace}
+\newcommand{\eps}{\varepsilon}
+
+\captionsetup{font={bf, small}}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\title{\vspace{-0.24in}\Large \bf Enforcing Customizable Consistency Properties in\\Software-Defined Networks}
+
+% Submission is double blind -- don't show names
+%\numberofauthors{1}
+%\author{\vspace{-7mm}Paper \#56}
+%\author[]{Paper #281, 14 pages}
+\author[*]{Wenxuan Zhou}
+\author[**]{Dong Jin}
+\author[*]{Jason Croft}
+\author[*]{Matthew Caesar}
+\author[*]{P. Brighten Godfrey}
+\affil[*]{University of Illinois at Urbana-Champaign}
+\affil[**]{Illinois Institute of Technology}
+
+%\date{~}
+
+\maketitle
+
+\input{abstract}
+\input{intro}
+\input{motivation}
+\input{overview}
+\input{design}
+\input{parallelism}
+\input{impl}
+\input{eval}
+\input{discussion}
+%\input{relwork}
+%\input{futurework}
+\input{conclusion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\section{Introduction}
+%
+%Here is the intro.
+%
+%The rest of this paper proceeds as follows. In \S\ref{sec:related}, we discuss related work. ...
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\section{Related Work}
+%\label{sec:related}
+%
+%\cite{caesar2006virtual,singla10scalable}, ...
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\section{Conclusion}
+%\label{sec:conclusion}
+%
+%We are awesome.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%\vfill\eject
+
+%\input{appendix}
+%\footnotesize
+%{
+\bibliographystyle{abbrv}
+
+\setlength{\itemsep}{-2mm}
+%\scriptsize
+\bibliography{paper}
+%}
+
+\end{document}

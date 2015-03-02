@@ -1,0 +1,421 @@
+\section{Introduction}
+\label{sec:intro}
+
+%\begin{center}
+%\emph{"In this world nothing is certain but death and taxes."}
+%\end{center}
+%\hfill ---{Benjamin Franklin}
+%\\
+
+%Modern networks, such as data center networks and enterprise networks, are essential in our daily lives. To keep those networks running properly, network operators often have established a set of correctness conditions.
+
+Network operators often establish a set of correctness conditions to ensure 
+successful operation of the network.
+Some of those are manually expressed in \wxzcr{configuration files}, such as
+%the form of policies, i.e.,
+%configurable rules, or regulations on how the network should behave
+the preference of one path over another, or the prevention of untrusted traffic
+from entering a secure zone. Others are deemed so obvious they are ``baked in"
+to protocols, such as loop
+and black hole avoidance. As networks become an increasingly crucial backbone for
+critical services,
+%such as the power grid, medical networks, military and
+%rescue operations, and financial services, and as network operators face
+%increasing regulatory requirements on correctness and security
+%properties of data transport (e.g., data isolation as in HIPAA, Sarbanes-Oxley,
+%etc.), 
+the ability to construct networks that obey correctness criteria is becoming
+even more important. 
+\wxznew{Moreover, as modern networks are in a constant state of changing, it is critical
+to keep them correct even during transitions.}
+%Unfortunately, today's approach of instilling policies on networks is an
+%error-prone process. Operators need to program policies into networks via
+%indirect mechanisms (low-level configuration commands on routers), and must
+%coordinate actions of complex protocols running across large numbers of
+%distributed devices to achieve their network-wide objectives.
+%The challenge of constructing networks that work correctly has led to a
+%variety of techniques to verify network behaviors~\cite{VeriFlow, PHA2012,
+%NetPlumber2013, Anteater2011, Al-Shaer2009, Al-Shaer2010} %, including work on
+%configuration analysis~\cite{xx,xx,xx}, flow monitoring~\cite{xx,xx,xx}, and
+%reachability modeling~\cite{xx,xx,xx}.  %Those techniques are useful to find
+%out when things go wrong, but humans are still involved in the repair process,
+%lengthening the time to fix the problem, and introducing potential faults
+%during the process.%As networks are dynamic, it is even harder to keep them working correctly.
+Thus, the challenge is to preserve properties even during
+network state transitions, which we refer to as maintaining {\em network consistency}. \fixme{This sounds like we came up with the term.  Also this sounds more like correctness than consistency.}
+
+Several recent proposed systems~\cite{Reitblatt2012,incremental-cu,zUpdate, Hong13}
+consistently update software-defined networks (SDNs), 
+transitioning between two operator-specified network snapshots. However, those
+methods maintain only {\em specific} properties, 
+and can substantially delay the network update process.
+\wxznew{Consistent updates~\cite{Reitblatt2012} (CU), for example, only guarantees
+{\em coherence}: during a network update any packet or any flow is
+processed by either a new or an old configuration, but never by a mix of the
+two. 
+%which first instills the new configuration in the middle of the
+%network, then updates ingress switches with a flip on packet version numbers.
+This is a relatively strong policy that is sufficient to guarantee 
+a large class of more specific policies (no loop, firewall traversal, etc.), 
+but it comes at the cost of requiring a two-phase update
+mechanism that incurs substantial delay between the two phases and doubles flow
+entries temporarily. For networks that care only about a weaker consistency property, e.g., only loop
+freedom, this overhead is unnecessary.  At the same time, 
+networks sometimes need properties \emph{beyond} what CU provides: 
+CU only enforces properties on
+individual flows, but not across flows (e.g., ``no more than two
+flows on a particular link'').
+SWAN~\cite{Hong13} and zUpdate~\cite{zUpdate} also ensure only 
+a specific property, in their case congestion freedom.} 
+
+That leads to a question: is it possible to efficiently maintain
+{\em customizable} correctness policies as
+the network evolves?
+Ideally, we want the ``best of both worlds'': the efficiency of simply immediately installing updates
+without delay, but the safety of whatever correctness properties are relevant to the network at hand.
+
+We are not the first to define this goal.
+Recently, Dionysus~\cite{jin2014dynamic} proposed to reduce network update time to just what is
+necessary to satisfy a certain property. However, Dionysus requires a
+rule dependency graph for each particular invariant, produced by an algorithm
+specific to that invariant (the paper presents an algorithm for packet
+coherence). For example, a waypointing invariant would need a new algorithm.
+Furthermore, the algorithms work only when forwarding rules match exactly one
+flow.
+% the more complicated case when rules overlap, such as with longest prefix
+%match, becomes trivial in \name since checking properties is easy.
+
+We take a very different approach that begins with an observation:
+synthesizing consistent updates for arbitrary consistency policies
+is hard, but network verification on general policies is comparatively easy,
+especially now that multiple real-time data plane verification 
+tools~\cite{VeriFlow, Al-Shaer2010, NetPlumber2013} \fixme{We cite Al-Shaer; does that paper operate in milliseconds?} can verify very generic data-plane properties of a network
+state within milliseconds. In fact, as also occurs in domains outside of networking, 
+there is a connection between synthesis and verification. 
+A feasible update sequence is one which the relevant properties are verifiable at each moment in time.
+Might a verifier serve as a guide through the search space of possible update sequences?
+%To synthesize a feasible sequence of
+%updates to preserve a given invariant, we argue, is to find the timing that each update
+%could be scheduled. A general network verifier, on the other hand, 
+%is able to tell us whether
+%any update is safe to pass to the network at any particular moment by checking
+%the supplied invariants. 
+
+Based on that insight, we propose a new consistent update system, 
+Customizable Consistency Generator (\name), which efficiently and consistently updates
+SDNs under customizable properties (invariants), intuitively by converting the scheduling synthesis problem
+to a series of network verification problems.
+With \name, network programmers can express desired invariants using an interface (from~\cite{VeriFlow})
+which allows invariants to be defined as essentially arbitrary functions of a data plane snapshot,
+generally requiring only a few tens of lines of code to inspect the network model. 
+Next, \name runs a greedy algorithm: when a new rule arrives from the SDN controller, 
+\name checks whether the network would satisfy the desired invariants if the rule were applied. 
+%were sent to the relevant device.
+If so, the rule is sent without delay; otherwise, it is buffered, 
+and at each step \name checks its buffer to see if any rules can be installed safely
+(via repeated verifications).
+
+This simplistic algorithm has two key problems.
+First, the greedy algorithm may not find the best (e.g., fastest) 
+update installation sequence, and even worse,
+it may get stuck with no update being installable without violating an invariant.
+However, we identify a fairly large scope of policies 
+that are ``segment-independent'' for which the heuristic is guaranteed to succeed
+without deadlock (\S\ref{sec:seg-independence}).
+%That is, to ensure such policies, the heuristic never gets stuck.
+For non-segment-independent policies,
+\name needs a more heavyweight update technique, 
+such as Consistent Updates~\cite{Reitblatt2012} or SWAN~\cite{Hong13}, to act
+as a fallback. 
+But \name triggers this fallback mechanism only when the greedy heuristic
+determines it cannot offer a feasible update sequence.  
+This is very rare in practice for the invariants we test (\S\ref{sec:eval}),
+and even when the fallback is triggered, only a small part of the transition is 
+left to be handled by it, so the overhead associated with the heavyweight mechanism 
+(e.g., delay and temporarily doubled FIB entries) is avoided as much as possible.
+%In such a way, \name avoids any violation to the desired policies.
+
+The second challenge lies in the verifier.
+Existing real-time data plane verifiers, such as VeriFlow and NetPlumber,
+assume that they have an accurate network-wide snapshot; 
+but the network is a distributed system and we cannot know exactly 
+when updates are applied.
+%Because of the distributed nature of networks, the \name engine
+%is unaware of the precise ordering and timing with which updates arrive at
+%devices in the network. However, existing data plane verifiers, such as Veriflow and NetPlumber,
+%inaccurately assume the updates applied exact the moment the tools see them.
+To address that, \name explicitly models the
+uncertainty about network state that arises due to timing,
+through the use of \wxzcr{{\em uncertain forwarding graph} (\S\ref{sec:design})}, 
+a data structure that compactly represents the range of possible network behaviors
+given the available information. 
+Although compact, \name's verification engine produces potentially larger models than 
+those of existing tools due to this ``uncertainty'' awareness. 
+Moreover, as a subroutine of the scheduling procedure, the verification function is called much more frequently
+than when it is used purely for verification. For these reasons,
+a substantial amount of work went into optimization, as shown in \S\ref{sec:microbenchmark}.
+
+In summary, our contributions are:
+\begin{itemize}[noitemsep,topsep=0pt,leftmargin=*]
+
+\item We developed a system, \name, to efficiently synthesize network update orderings 
+to preserve customizable policies as network states evolve.
+
+\item We created a graph-based model to capture network \wxzcr{uncertainty}, 
+upon which real-time verification is performed (90\% of updates verified within 10 $\mu$s).
+
+\item We evaluate the performance of our \name implementation in both emulation 
+and a physical testbed, and demonstrate that \name offers significant performance improvement over previous work---up to $3\times$ faster updates, typically with zero extra FIB entries---while preserving various levels of consistency. 
+\end{itemize}
+ 
+
+\kevin{
+%To maximize update speed, we have developed a greedy heuristic scheduling algorithm in \name, and precisely identify the scope of policies whose consistency is completely guaranteed by the heuristic. To make \name capable to handle any given policies, we designed a fallback algorithm that allows \name to fall back from the greedy heuristic to more heavyweight techniques, such as Consistent Updates \cite{Reitblatt2012} and SWAN \cite{Hong13}. \name guarantees such fallback is triggered only when theoretically required, thus preserving strong and flexible consistency properties, with significant reductions in time and memory in practice. Through both emulations and physical testbed experiments, we have demonstrated \name can achieve ...
+\kevinc{adding the most promising results here. such as X1-- X2 speedup (or up to X speedup) than previous solutions, memory reduction} }
+
+\if 0
+Another key challenge is to achieve a good trade-off between efficiency and consistency.
+To this end, \name employs a lightweight heuristic
+algorithm as the basic scheduling mechanism, falling back to a more
+heavyweight procedure when it encounters cases that are unschedulable
+by the lightweight approach.
+%To this end, \name employs a greedy heuristic algorithm as the basic scheduling mechanism,
+%in order to maximize update speed, 
+%and a heavyweight update solution plugged in, to backup the heuristic to guarantee consistency.
+We identify the scope of policies that are {\em segment-independent} 
+(defined in \S\ref{sec:seg-independence}),
+and guaranteed by the heuristic alone.
+For non-segment-independent policies, 
+\name reliably distinguishes
+segment-independent policies, ensuring the lightweight mechanism is
+applied whenever possible, yet guaranteeing correctness falling back
+to the more heavyweight mechanism when and only when necessary.
+%only when the heuristic component determines it cannot offer a 
+%feasible update sequence to ensure consistency, \name triggers the plug-in mechanism to proceed updates.
+%\fi
+%We take a hybrid approach to address the issue. \name is designed in such a way that integration with other update mechanisms, such as Consistent Updates \cite{Reitblatt2012} and SWAN \cite{Hong13}, is straightforward. Such integration is triggered only when the heuristic gets stuck, and thus preserves the consistency level of existing solutions, with significant reduction in time and memory. 
+%In this way, \name achieves nearly the ``best of both worlds": the efficiency of passing through updates in most cases, with the consistency guarantees of more heavyweight techniques.
+%We demonstrated \name's capability of enforcing generalized consistency properties with high efficiency (in terms of both time and space) through emulations and physical testbed experiments (\S\ref{sec:eval}).
+
+%\if 0
+Operators can express\cut{,in a flexible framework,} \wxz{customized} network
+properties, and \name ensures that those properties are efficiently
+maintained in the presence of network dynamics.  \name works by constructing a
+model of distributed network operations, and automatically synthesizing update
+sequences to enforce a set of supplied {\em network invariants} \kevin{by verifying the model against the invariants}. A key
+challenge is that of dealing with the distributed nature of networks;  the \name engine
+is unaware of the precise ordering and timing with which updates arrive at
+devices in the network. To address that, \name \cut{(a)} explicitly models the
+``uncertainty" about network state through the use of a novel {\em symbolic
+network representation}, a data structure that compactly represents \cut{the array
+of}all different possible network states.\cut{, and (b) leverages the model to
+efficiently synthesize update orderings to ensure that the network continuously
+obeys supplied objectives in the presence of the uncertainty.}
+\wxznew{Another key challenge arises because \name employs a greedy 
+heuristic to synthesize update sequences and maximize the update speed. %As we will show in Section~\ref{sec:overview}, this approach hinges on the {\em segment-independence} property of the consistency policies of interest.
+We identify the scope of policies that are {\em segment-independent} (\S\ref{sec:overview}),
+and guaranteed by \name's heuristic.} %We also consider policies out of this scope, leading to either (a) a hybrid approach employing both \name and some existing update mechanism whose efficiency could be greatly improved by \name, or (b) a choice for operators to make a trade-off between update efficiency and consistency.}
+\kevin{For non-segment-independent policies, \name cannot always offer a feasible update sequence to ensure consistency. We take a hybrid approach to address the issue. \name is designed in such a way that integration with other update mechanisms, such as Consistent Updates \cite{Reitblatt2012} and SWAN \cite{Hong13}, is straightforward. Such integration is triggered only when the heuristic gets stuck, and thus preserves the consistency level of existing solutions, with significant reduction in time and memory. 
+\cut{
+Second, our design of \name actually offers network operators great flexibility to balance the update speed and consistency enforcement. For example, some transient errors could be tolerable in return for signification update speed improvement, thus simply applying the update when \name gets stuck may be a desirable action from the operator's perspective in many scenarios.}
+} 
+%Modern networks, such as data center networks and enterprise networks, are essential in our daily lives.
+%Sometimes, network operators wish to express opinions on what the network should do,
+%through a set of "notions" or /invariants/, for example, there should be no forwarding loops,
+%or untrusted traffic should not be able to enter a secure zone.
+%So how can we construct networks that obey these invariants?
+%%One way would be to have the operators physically write down states for the networks.
+%One way would be to have the network software or configuration checked prior to deployment.
+%But the problem is networks are dynamic, 
+%%and we don't want to force the network operator 
+%%or the programmer 
+%so to explore state for every possible event might lead to a state explosion, especially for large-scale networks.
+%Instead, as network evolves, we could make sure every state is correct. 
+%In particular, the emerging Software Defined Network (SDN) helps, by provideing a logically centralized controller interface.
+%The global visibility of the controller simplifies the task to construct invariants compliant network states. 
+%%Instead we could leverage dynamic techniques that realize invariants,
+%%such like distributed routing protocols, or newer SDN solutions with centralized controllers.
+%%Using these techniques, in general, what we have is an "actor" or a set of actors, 
+%%disseminating state to other parties.
+%However, SDN doesn't change the fact that states are disseminated
+%over a distributed and asynchronous network.
+%%one fundamental issue is that 
+%It takes time for information about events to propagate out
+%and because of that, there is this inherent "uncertainty" that takes place.
+%The controller can send updates to the network, but it doesn't know when they take effect;
+%or it can take samples from the network, but doesn't know when they were taken.
+%More formally, we define the period of time during which the view of the network 
+%from an observation point (e.g., SDN controller)
+%might be inconsistent with the actual network state as temporal network uncertainty. 
+%This uncertainty deviates network behavior away from the desired invariants, 
+%temporarily or permanently. 
+%So the fundamental challenge is to preserve network properties under such uncertainty.
+%
+
+%%On the other hand, networks are dynamic in nature. Physical failures can happen at any time, 
+%%workload keeps changing, and accordingly forwarding behaviors are adjusted from time to time, 
+%%interleaving with packets that may traverse the network in any possible orders. 
+%%To make sure of consistent correctness, policy-compliant states need to be inserted 
+%%into network devices over time adapting to such ever changing environment and demand.
+%
+%%What's more, networks are inherently distributed and asynchronous, with inevitable communication delays among different components. Therefore, there is no single point that is able to get an instantaneous global view of a network. That is, at any given time point, there's some amount of uncertainty of our observation of a network, such as packet reordering, queuing delay, and even topology changes, as well as inconsistency between the desired policy and actual network behavior during state transitions.
+%%To address this problem, various routing protocols are proposed to achieve fast convergence~\cite{} in a distributed way.
+%%The concept of a centralized control plane is also emerging to simply network management, for example, RCP and SDN. 
+%
+%There are a class of proposals~\cite{Reitblatt2012, incremental-cu, zUpdate, Hong13} that try to address this issue. But each of these ensures one fixed notion of consistency property. Consistent updates~\cite{Reitblatt2012}, for example, makes sure no packet sees a mix of old and new network states during transitions (packet coherence) via a two-phase update scheme. 
+%This is a nice step towards guaranteeing network consistency, but there is one major drawback: 
+%they don't handle general consistency policies efficiently.
+%No matter what properties a system cares about, 
+%the same "heavyweight" update mechanism is applied.
+%As discussed in ~\cite{Mahajan13}, the timing to safely apply 
+%one update depends on updates present in the data plane.   
+%The higher level the enforced consistency property is, 
+%the stronger dependency it imposes among the rules, 
+%and thus the less quickly the data plane can be updated.
+%It is quite possible that the system needs a much lower level of consistency, 
+%e.g., absence of loops, to be maintained during transitions.
+%But using such schemes, it has to pay an unnecessary cost 
+%in terms of both latency and device memory.
+%For instance, consider a control application that reactively 
+%assigns paths in response to data flow arrivals.
+%As a stream of flows arrive, the operator cannot afford waiting for a two-phase update (taking at least one and half round trip times between the controller and switches) 
+%to complete before allowing each flow to enter the network.
+%Because of this, subject to consistency property constraint,
+%maximizing control throughput to speed up update is of great importance. 
+%Moreover, various functionalities of modern networks could require arbitrary properties, 
+%and as a network evolves, its required properties may change. 
+%Together these requirements demand a lightweight network updating method 
+%that supports a generic set of consistency properties. 
+%
+%%Second, two snapshots of the network (new and old) are required prior to any state change, 
+%%which may not always be available. 
+%%For example, consider a control application reactively assign paths in response to data flow arrivals.
+%
+%%However, as noticed in ~\cite{NetPlumber2013}, such a centralized control interface doesn't eliminate the distributed nature, but only hides it underneath. Several mechanisms are designed to ensure a particular consistency requirement, e.g., no packet sees a mix of old and new network states~\cite{NetPlumber2013}, is satisfied even during state transitions. 
+%
+%So in this paper, we study the following question: 
+%%\emph{Given an arbitrary network consistency requirement, 
+%%is it possible to efficiently enforce it in the presence of network dynamics?} 
+%\emph{Given an arbitrary network consistency requirement, 
+%is it possible to ensure it in the presence of uncertainty while achieving maximized control throughput?} 
+%%More specifically, given a consistency policy, and what we know about the network, 
+%%can we 1) model what \emph{could} happen, taking into account uncertainty in timing of rule installation, packet timing, etc., 
+%%2) verify the network model against desired consistency policy,
+%%3) and based on verification outputs, synthesize a feasible plan of updating the network that minimizes a certain cost criteria, e.g., update latency? 
+%
+%We present a generic framework, \name, 
+%which guarantees any given consistency property as network evolves. 
+%%An algorithm of verifying and synthesizing network state under uncertainty is developed. 
+%\name takes the approach 1) to understand network uncertainty
+%through modelling and verification,
+%and then 2) to enforce the property based on the knowledge from step one.
+%
+%There are two key challenges.
+%First, real-time modeling/verification under network dynamics. 
+%%First, modeling/verification under uncertainty. 
+%The complexity of modern networks together with temporal control uncertainty makes it fundamentally difficult to model and further verify networks as they evolve. Existing tools~\cite{Anteater2011, Al-Shaer2009, PHA2012} verify network state by checking snapshots of the network, and specifically VeriFlow~\cite{VeriFlow}, FlowChecker~\cite{Al-Shaer2010}, and NetPlumber~\cite{NetPlumber2013} build the snapshot in an incremental manner. But to the best of our knowledge, none of these various tools take network dynamics/uncertainty during the transition of the snapshots into consideration.
+%They effectively assume that the updates are applied at exactly the moment the tools see them, 
+%and thus the way networks are modeled is inaccurate to some extent. 
+%%In other word, bugs caused by being uncertain of the network status are neglected.
+%The main difficulty is to tell what is happening based on the incomplete knowledge known so far, in any possibly encountered situation.
+%%To make sure network behave correctly, there are another group of proposals 
+%%~\cite{Anteater2011, Al-Shaer2009, PHA2012, VeriFlow, Al-Shaer2010, NetPlumber2013} 
+%%try to verify network state and block faulty updates. 
+%%However, none of these takes network uncertainty into account.
+%To address this challenge, we develop a graph-based network modelling technique
+%that captures network uncertainty, and conduct verification on the model in real-time.
+%
+%Second, it is difficulty to support an \emph{arbitrary}\wxzc{should we say "arbitrary" or be a little conservative here?} consistency property.
+%If the policy verification function is tightly coupled with other components, 
+%whenever a different policy is desired, we end up redesign the entire system. 
+%To this end, we design a platform, which takes the decision procedure of 
+%any property of interest as a plug-in module 
+%rather than reasoning a specific property invariant.
+%We name this plug-in module as black-box verification engine.
+%Given an update and a network model as inputs, 
+%a black-box engine simply outputs whether or not this update passes the specific verification.
+%%For any given consistency requirement, for example, two hosts c , or no suboptimal routes, 
+%%is specified as a verification engine plugged into the framework. 
+%Based on the outputs, we design an algorithm to synthesize an update plan 
+%compliant with the property while maximizing update parallelism.
+%In this way, we are able to realize flexible network consistency notion.
+%%without any knowledge of internal workings of the verification engine.
+%
+%
+%\wxzc{contributions}
+In summary, our contributions are:
+\begin{itemize}[noitemsep,topsep=0pt,leftmargin=*]
+\item As the first step towards synthesizing a correct update ordering, we monitor the network state continuously,
+  by explicitly modeling its distributed nature.
+Leveraging this modeling technique, we develop a verification tool to check network states against desired properties.
+
+\item We generalize the notion of network consistency. By customizing consistency requirements, we show how efficiency-consistency the trade-off can be better utilized. 
+
+\item Based on the verification tool, we design a generic framework, \name, to efficiently ensure any given consistency requirement .
+
+%\item We propose the first real-time network modelling and verification technique, which is uncertainty aware, and thus capable of improving bug coverage by a great deal\wxzc{?} compared with previous tools.
+
+\item We evaluate the performance of our \name implementation with both emulation and physical testbed experiments, and demonstrate that \name offers significant performance improvement over previous works (such as consistent updates, incremental consistent updates and VeriFlow), while preserving various levels of consistency. 
+\wxznew{
+\item We identify network consistency policies that can be guaranteed network
+updates with zero extra time or space cost.
+
+\kevinc{Does it mean we identify the scope of policies whose consistency during network transition can be guaranteed, with zero extra time or space cost (as compared with?) ?}
+
+\item We propose a technique to reduce network update scheduling problems to a
+general network verification problem, and develop a framework,
+
+%\item We develop a framework, 
+\name, which synthesizes correct update orderings
+to preserve customizable network invariants as network states evolve.
+
+\item We create a temporal-uncertainty-aware network model in \name, which is
+capable to capture network faults caused by the inconsistent views between the
+controller and the network in real time (90\% updates verifications are done
+within 10 $\mu$s).
+
+\item We design an algorithm that heuristically maximizes the parallelism of
+update installation atop our network model, which enables \name to produce an
+efficient scheduling that maximizes the speed with which rules can be installed
+while preserving the given invariants. 
+
+\wxz{ 
+\item Through our evaluation, which uses both emulation and a
+78-switch-scale testbed, we demonstrate that for any invariants that the
+consistent updates scheme \cite{Reitblatt2012} guarantees, \name can guarantee
+it with better efficiency, up to 2/3 update delay reduction.  }
+
+\kevin{
+\item We reduced the complex network update scheduling problem to a
+general network verification problem.
+
+\item We developed a framework, \name, to efficiently synthesize network update orderings with the goal of preserving customizable \cut{invariants and }policies as network states evolve.
+
+\item We created a graph-based model to capture network dynamics, based on which real-time verification (90\% of update verifications are done within 10 $\mu$s)\wxzc{should we mention 90\% or just say roughly 10mu? since 90\% is only for verifying BGP rules.} is performed to capture network faults and inconsistencies\cut{inconsistent policies}.
+
+\item We identified the scope of network consistency policies that can be guaranteed \cut{by \name} efficiently during network updates, and design an algorithm that heuristically maximizes the parallelism of update installations.
+
+\item We enabled easy integration of \name with other consistency enforcement tools. \cut{and the design also offers operators great flexibility to balance between network-wide policy consistency and speed during network updates.}
+\wxznew{Together with the heuristic algorithm, \name achieves nearly the ``best of both worlds" --- 
+the efficiency of simply passing through updates in most cases, 
+with the consistency guarantees of more heavyweight techniques.}
+
+\item We demonstrated \name's capability of enforcing generalized consistency properties efficiently \cut{general and customizable consistency and being much more time and space efficient than existing tools}through emulation and physical testbed experiments.
+}
+\end{itemize}
+\fi
+%We first investigate various network invariant violations that are caused by neglecting uncertainty of interleaving of network events, such as packet arrivals, rule installations, and so on. Then we present a design, Uncertainty-Aware-Verifier (\name), to demonstrate how much bug coverage we can improve by taking uncertainty into account, with limited extra overhead. More specifically, to model the uncertainty of the network, for every update, we symbolically model the forwarding behaviors of packet that arrive before and after this update takes place in the network, until we are certain about the status of the update (acked or timed out). To avoid state space explosion, we develop several optimization methods to reduce the performance cost. To evaluate our design, we implement a prototype based on our previous work~\cite{VeriFlow}. From our performance evaluation, ... Note that although our implementation uses VeriFlow as a foundation, the design philosophy can be combined with other debugging tools, such as NetPlumber~\cite{NetPlumber2013}.
+%Furthermore, based on this uncertainty model, we invent a technique to maximize update processing parallelism while preserving key network properties.
+%
+\if 0
+Section~\ref{sec:motivation} presents the problem in detail and overviews the
+related work.  Section~\ref{sec:overview} describes our approach to ensure
+generalized network consistency properties.  We then present our
+uncertainty-aware network model in Section~\ref{sec:design}.  In
+section~\ref{sec:parallelism}, we introduce our design of \name, with the goal of
+maximizing control parallelism while preserving given consistency properties.
+%generalized network consistency properties enforcement and control throughput
+maximization.  After showing implementation in Section~\ref{sec:impl} and
+evaluation results in Section~\ref{sec:eval}, we conclude the paper.  
+\fi 
+%with future work in Section \ref{sec:conclusion}.  % %

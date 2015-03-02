@@ -1,0 +1,26 @@
+\wxzcr{
+\section{Discussion}
+\label{sec:discussion}
+  \vspace{-0.1in}
+\paragraphb{Limitations:}
+\name synthesizes network updates with only heuristically maximized parallelism, and 
+in the cases where required properties are not {\em segment independent},
+relies on heavier weight fallback mechanisms to guarantee consistency.
+When two or more updates have circular dependencies with respect to the consistency properties,
+fallback will be triggered. One safe way of using \name is to provide it with a strong fallback plug-in,
+e.g., CU~\cite{Reitblatt2012}. Any weaker properties will be automatically ensured by \name, 
+with fallback triggered (rare in practice) only for a subset of updates and when necessary.  
+In fact, one can use \name even when fallback is always on. 
+In this case, \name will be faster most of the time, as discussed in \S\ref{sec:synthesis}. 
+
+\paragraphb{Related work:}
+Among the approaches mentioned in \S\ref{sec:motivation}, four warrant further discussion.
+Most closely related and concurrent with our work \fixme{not really; Dionysus was published before we submitted} is Dionysus~\cite{jin2014dynamic}, a dependency-graph based approach that achieves a goal similar to ours. As discussed in \S\ref{sec:motivation}, our approach has the ability to support 1) flexible properties with high efficiency without the need to implement new algorithms, and 2) applications with wildcarded rules.
+\cite{mcclurg15} also plans updates in advance, but using model checking. It, however, does not account for the unpredictable time switches take to perform updates.
+In our implementation, CU~\cite{Reitblatt2012} and VeriFlow~\cite{VeriFlow} are chosen as the fallback mechanism and verification engine. Nevertheless, they are replaceable components of the design. For instance, when congestion freedom becomes the property of interest, we can replace CU with SWAN~\cite{Hong13}.  
+
+\paragraphb{Future work:} We plan to study the generality of {\em segment independent} properties both theoretically and practically, test \name with more data traces, and extend its model to handle changes initiated from the network. We will also investigate 
+utilizing possible primitives in network hardware to facilitate consistent updates.
+  \vspace{-0.1in}
+}
+

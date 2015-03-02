@@ -1,0 +1,126 @@
+\section{Implementation}
+\label{sec:impl}
+We implemented a prototype of \name with 8000+ lines of C++ code. \name is
+a shim layer between an SDN controller and network devices, 
+intercepting and scheduling network updates issued by the
+controller in real time. 
+%It verifies the updates and synthesizes a correct
+%ordering of updates to preserve consistency during network transition. 
+
+\name maintains several types of state, including network-wide data plane
+rules, the uncertainty state of each rule, the set of buffered updates, and bandwidth
+information (e.g., for congestion-free invariants). It stores data plane rules
+within a multi-layer trie in which each layer's sub-trie represents a packet header field.
+We designed a customized trie data structure for handling different types of rule wildcards,
+e.g., full wildcard, subnet wildcard, or bitmask wildcard~\cite{openflow-spec},
+%differently,
+%--- rules agnostic to matching on certain bits or fields, 
+and a fast one-pass traversal algorithm to accelerate verification.
+\wxzcr{
+To handle wildcarding for bitmasks, each node in the trie has 
+three child branches, one for each of \{0, 1, don't care\}. 
+For subnetting, the wildcard branch has no children, but points 
+directly to a next layer sub-trie or a rule set.
+Thus, unlike other types of trie, 
+the depth of subnet wildcard tries is not fixed as the number of bits in this field, 
+but instead equals to the longest prefix among all the rules it stores.
+Accordingly, traversal cost is reduced compared with general tries.
+For full wildcard fields, values can only be non-wildcarded or full wildcarded.
+The specialized trie structure for this type of field is a plain binary tree plus a wildcard table.
+
+When a new update arrives, we need to determine the set of affected ECs,
+as well as the rules affecting each EC.
+VeriFlow~\cite{VeriFlow} performs a similar task via a two-pass algorithm,
+first traversing the trie to compute a set of ECs, and then for each of the
+discovered ECs, traversing the trie again to extract related rules.  In \name,
+using callback functions and depth first searching, 
+%we implemented in place checking, and 
+the modeling work is finished with only one
+traversal. This algorithm eliminates both the unnecessary extra pass over the
+trie and the need to allocate memory for intermediate results.}
+%we optimize this process by maintaining some additional accounting information,
+%which lets us accomplish our similar objective in a single pass.  
+%Our algorithm starts from the top layer subtrie, and combinations
+%of its branches that match the first field of the update to be checked are
+%selected. The traversal continues on the matched combinations, and would be
+%further confined by the following fields of the update.  A matched combination
+%of branches in the last level is an EC, and it already points to the rule set
+%for that EC.  
+%In
+%addition, this approach results in a smaller number of ECs---each wildcard
+%branch itself forms a matched combination.
+
+In addition to forwarding rules, 
+the data structure and algorithm are also capable of handling packet transformation rules, 
+such as Network Address Translation (NAT) rules, and rules with VLAN tagging, which are used by CU for versioning, and verified by \name when the CU plug-in is triggered (see \S\ref{sec:eval}).
+
+%\wxznew{
+%One special case is dealing with packet transformation rules. 
+%When such a rule is encountered during graph traversal phase, a new pass over the trie
+%for the transformed EC is triggered. 
+%Note that the graph is constructed while traversing rules, so only rules encountered 
+%before transformation are kept, and the remaining rule set is discarded.
+%More importantly, in this case, multiple trie traversals are possible, but only when 
+%necessary, i.e., when a transformation rule is possibly forwarding packets for the original EC.
+%} 
+
+To keep track of the uncertainty states of rules, we design a compact state machine, which enables \name to detect rules that cause potential race conditions. If desired, our implementation can be configured to insert barrier messages to serialize those rule updates.
+
+To bound the amount of time that the controller is uncertain about network states, 
+we implemented two alternate types of the confirmation mechanisms: (1) an application-level acknowledgment by
+modifying the user-space switch program in Mininet, and (2) leveraging the
+barrier and barrier reply messages for our physical SDN testbed experiments.
+
+\wxzcr{
+%The way that \name stores and retrieves data plane rules is motivated by VeriFlow~\cite{VeriFlow}. 
+%The essential idea is to build a multiple-layer trie, with each layer sub-trie 
+%representing a packet header field. 
+%Each level of a sub-trie corresponds to a bit of that \cut{packet header} field.
+%%and can be one of three possible values: $0$, $1$, or wildcard.
+%An upper layer sub-trie contains pointers on leaves to sub-tries in the next layer. 
+%Dataplane rules are stored at the leaves of bottom sub-tries.
+%A path from the root to a leaf of a bottom sub-trie determines a packet set, and one or more such sets can be merged together to form an \emph{equivalence class} (EC) of packets, \matt{i.e.,}
+%%More formally, an \emph{equivalence class} (EC) is 
+%a set of packets experiencing the same behaviors \wxznew{throughout the network}\cut{at any network device}.
+%Upon arrival of an update, its effect on the network state is checked, by limiting searching to ECs whose behavior may be affected by this update, and building a graph model for each affected EC.
+%However, given the need to store multiple different representations of the network state, the storage and processing overhead of \name could be larger than just maintaining a single snapshot, \matt{as done in} VeriFlow.
+%\wxznew{
+%Moreover, there are rules that perform packet transformation,
+%such as Network Address Translation, i.e., these rules transform packets from one
+%EC to another EC. To accurately model network behaviors, we need to able to handle such rules,
+%which are left out in our motivating work, Veriflow.
+%To meet this end,
+%}
+%we design a scalable data structure and an efficient algorithm to operate on it.
+
+%\paragraphb{Customized Trie Data Structure}
+%To scale the data structure,
+%besides the general type of trie, we design two types of customized trie structure. 
+%\matt{
+%One complication is dealing with {\em wildcards} -- rules agnostic to matching on certain bits
+%or fields. Wildcards complicate the traversal process, as multiple branches may need to be traversed, and the manner
+%in which they are traversed can depend on the semantics of the rule (e.g., standard wildcards vs. longest-prefix match).
+%To address this, we construct an algorithm that handles general bitmasking, then extend it with optimizations
+%to more efficiently handle two common-case wildcard patterns: full wildcards (the entire field is wildcarded) and subnet mask (all bits
+%less than a certain significance are wildcarded).  }
+
+%\paragraphb{One-pass Traversal Algorithm}
+
+%These efforts together with a highly optimized implementation 
+%allow \name to run almost 100X faster compared to VeriFlow
+%%despite having all the challenges we listed.
+%with 15X less memory overhead% (540MB vs. 9GB).
+%(\S\ref{sec:microbenchmark}). 
+%One of our ongoing works is exploring the parallel implementation of the data structure.
+
+%Similar to our prior work~\cite{VeriFlow}, 
+\name exposes a set of APIs that can be used to write general queries in C++.
+The APIs allow the network operator to get a list of affected equivalence 
+classes given an arbitrary forwarding rule, the corresponding 
+forwarding graphs, as well as traverse these graphs in a controlled manner 
+and check properties of interest. For instance, an operator can ensure
+packets from an insecure source encounter a firewall before accessing an internal server.
+%To ensure this invariant, \name can be extended using the above APIs to incorporate 
+%a custom query algorithm that reports an violation when the packet from that source bypasses the firewall.
+}
+

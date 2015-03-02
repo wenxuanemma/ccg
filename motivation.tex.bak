@@ -1,0 +1,184 @@
+\section{Problem Definition and Related Work}
+%\section{Network Uncertainty}
+\label{sec:motivation}
+
+%We want to ensure that networks are always in correct states over time and state changes.
+The ultimate goal of our work is to ensure that networks are always in correct states over time and state changes.
+Specifically, we study this problem in the context of software defined network (SDN), where a logically centralized controller is responsible for disseminating commands to network devices. 
+There are three key goals of our work:
+
+\begin{itemize}
+\item to handle general network consistency properties;
+\item to enforce consistency during network updates;
+\item to maximize update efficiency.
+\end{itemize}
+
+%- handle general invariants - talk about how important that is
+\subsection{Generalized Consistency Properties}
+
+The range of consistency properties of networks is very broad.
+For instance, the successful operations of some networks highly depend on loop freedom, balanced load across links, and/or the absence of suboptimal routes, or some networks have to guarantee no access control violations to secure the critical assets. 
+%Existing mechanisms deals with different consistency properties, individually.
+%and their focuses are in isolation.
+As proposed in~\cite{Mahajan2013}, a generic framework to handle general properties is needed.
+Researchers have attempted to ensure certain types of consistency properties, e.g., loop freedom, packet coherence, or absence of packet loss~\cite{xx}, but those studies do not provide a generalized solution.
+One approach would be to implement a general consistency enforcement mechanism from scratch. 
+However, there has been extensive work on general network verification~\cite{HSA, VeriFlow, NetPlumber2013, Al-Shaer2010, Anteater}. Hence, we took the approach of developing a scheme to %``reduce and 
+translate consistency enforcement into network verification (\S\ref{sec:design}).
+
+%First, some networks may need diffrent
+%properties, for which effective procedures or even best-
+%case structures are unknown (e.g., load balancing across
+%links and maintaining packet ordering within a flow)
+
+%Second, even for the properties in Table
+%focuses on consistency properties in isolation. 
+%The combinations are hard to ensure, and everycient algorithms are not
+%known. For instance, drop freedom and memory limit,
+%while easy to ensure individually, are challenging to en-
+%sure in combination. Maintaining the combination re-
+%quires global dependencies, as introducing some rule
+%at a switch might need to remove another rule first,
+%which can only be removed after having added a new
+%rule somewhere else
+%Third, the table only shows the qualitative part of
+%the story and ignores quantitative ects that may be
+%equally important. Even though [
+%] can resolve the dependencies
+
+\subsection{Consistency at Every Step}
+%- strong consistency properties - correct at every step
+The asynchronous and distributed nature of modern networks induces that no single network component can obtain a correct instantaneous network-wide view. The emergence of software-defined networking, despite providing a logically centralized management interface, does not change this fact~\cite{Nice2012}. 
+Thus, our observation of a network, for example, from an SDN controller, is uncertain at any given time. The root cause is the inevitable delays between the controller and network devices \wxzc{as well as rule installation time}, which vary across devices and over time. 
+After issuing updates to the network, the controller has limited knowledge when and in what order the updates will be applied. 
+After changes originated from the network occur, such as device failures, link congestions, and mobile hosts movements, the controller will only be aware of those changes after a certain delay or perhaps never will, depending on the implementation. 
+Moreover, data packets from all possible sources may traverse the network at any time in any order, interleaving with the network data plane updates. 
+
+Therefore, a question is raised as networks keeps evolving: how to enforce consistency properties at every step of state changes, with the incomplete and uncertain network view at the controller.
+There are tools~\cite{Al-Shaer2010, NetPlumber2013, VeriFlow} that attempt to check network state snapshots incrementally against desired properties, and to block faulty updates.
+But to the best of our knowledge, none of those various tools take into account the uncertainty during the transition of the snapshots.
+They effectively assume that the updates are applied at the exact moment that the verification tools observe the updates, but such network models without considering the temporal uncertainty will lead to inaccurate network behaviors. Moreover, other than verification and blocking, they do not try to instill correctness.
+Another group of work~\cite{Reitblatt2012, incremental-cu, zUpdates, Hong2013} constructs network snapshots in a way that any snapshot can comply with the required properties. However, they neither handle generalized properties, nor produce good update efficiency.
+
+\subsection{Maximizing Control Throughput}
+%- maximizing efficiency
+Correctness and efficiency are two sides of the same coin, and both are crucial to network management. 
+While preserving correctness properties, network operators also wish to perform network operations in a most efficient manner.
+There are proposals~\cite{Reitblatt2012, incremental-cu, zUpdate, Hong13} that try to instill correctness according to a specific consistency property. 
+However, efficiency was not the focus.
+Consistent updates~\cite{Reitblatt2012}, for example, makes sure no packet sees a mix of old and new network states during transitions (packet coherence) via a two-phase update scheme. 
+%they don't handle general consistency policies efficiently.
+No matter what properties a system cares about, 
+the same slow update mechanism is applied.
+As discussed in ~\cite{Mahajan13}, the timing of safely applying 
+one update is dependent on existing updates in the data plane.
+The higher level the enforced consistency property is (e.g., packet coherence is a stricter requirement than loop freedom), 
+the stronger dependency is imposed among the rules, 
+and thus, the slower the data plane can be updated.
+It is quite possible that the system needs a much lower level of consistency, 
+e.g., absence of loops, to be maintained during transitions.
+In those cases, using such schemes will result in unnecessary costs in terms of both latency and device memory consumption.
+For instance, let us consider a control application which reactively 
+assigns paths in response to data flow arrivals.
+As a stream of flows arrive, the operator %cannot afford waiting 
+needs to wait for a two-phase update to complete (taking at least one and half round trip times between the controller and switches) before allowing each flow to enter the network.
+Therefore, subject to consistency property constraints,
+maximizing control throughput to speed up processing of updates is of great importance. 
+%Moreover, various functionalities of modern networks could require arbitrary properties, 
+%and as a network evolves, its required properties may change. 
+%Together these requirements demand a light-weighted network updating method 
+%that supports a generic set of consistency properties. 
+%
+
+%In this section, we describe the problem of network uncertainty and its negative effect on network-wide verification. 
+%Here, we define the inconsistency between the view of the observation point and the network state data packets encounter as network uncertainty.
+
+%Such uncertainty imposes an question to network verification, and more specifically, here we focus on data plane verification by analyzing snapshots of the network-wide data-plane state~\cite{Al-Shaer2009, Al-Shaer2010, VeriFlow, PHA2012, NetPlumber2013}. \emph{What if there is uncertainty of the presentation of the network snapshots?} Before answering this question, we first illustrate how badly this uncertainty can affect network verification.
+%
+%First, the bugs caused by such uncertainty, and thus neglected by the current data-plane verifiers, are prevalent. 
+%%To illustrate how uncertainty makes the problem much harder,
+%
+%\begin{figure}[!ht]
+%  \centering
+%  \includegraphics[width=\columnwidth]{figs/example}
+%  \caption{Example.}
+%  \label{fig:example}
+%\end{figure}
+%
+%Let us look at an extremely simple example (Figure~\ref{fig:example}). Suppose there are two switches, $A$ and $B$, in the network, and switch $A$ has a forwarding rule to $B$. For the sake of simplicity, assume $A$ forwards all packets to $B$. Now the network operator wants to reverse the flow of traffic through the following two steps: 1. telling switch $A$ to remove its flow rule; 2. telling switch $B$ to insert a flow rule sending everything to $A$. Now the operator issues these two commands in this order, and neither the before or the after state of the network contains a loop between $A$ and $B$. However, we do not know when the commands arrive and are processed. It is possible that the execution on switch $B$ happens earlier than that on switch $A$, resulting a transient loop. This bug may seem not quite harmful, but the consequence of ignoring it could induce a chain of errors, especially when this transient state lasts long enough. Besides, this shows even such a simple task which is well planned in advance can go wrong due to some uncertainty. 
+%%Note that in this case, serializing rule installation would help eliminate the bug, but at the cost of performance, and more importantly there are scenarios where carefully crafting ordering doesn't help~\cite{Reitblatt2011}. More devastating examples include errors caused by interleaving between packet arrivals and configuration changes, which will be discussed in more details in Section\ref{sec:motivation}.
+%As for commonly used control programs, things are the same. 
+%Three out of eleven bugs found by NICE~\cite{Nice2012}, (BUG-V, BUG-IX, and BUG-XI) are caused by the control programs' lack of knowledge of the network sate.  
+%
+%Second, such bugs may bring serious consequences.
+%One may think such uncertainty related errors are all transient, and as a result, ignoring them doesn't matter much. 
+%This is true with this reversing link example. 
+%However, some such errors can be permanent if no attention is paid. 
+%For example, if the control program asks a switch to install a rule at some point, 
+%but later the program wants to withdraw this rule. 
+%The problem is the two instructions can be reordered at the switch, 
+%and what the switch does is first to remove a non-existing rule, 
+%and then install the same rule, resulting a state against the program's intention. 
+%Without querying the flow table at the switch, 
+%the view of the controller and the network state will be inconsistent until the rule expires.
+%One may argue that inserting a barrier message in between the two instructions solves the problem. 
+%But first, this is only an example to demonstrate the point for the sake of simplicity, 
+%and realistic cases are much more complex. 
+%While in this case, serializing rule installation would help eliminate the bug at the cost of performance, 
+%there are scenarios where carefully crafting ordering doesn't help~\cite{Reitblatt2011}. 
+%Besides, it is the question who should be responsible to discover this problem and to insert the barrier message.
+%As for commonly used control programs, things are the same. 
+%Three out of eleven bugs found by NICE~\cite{Nice2012}, (BUG-V, BUG-IX, and BUG-XI) are caused by the control programs' lack of knowledge of the network sate.  
+%
+%Moreover, even if the errors disappear after a while, they have the potential to make the network suffer in terms of both security and performance. 
+%%performance
+%%security
+%As for security, temporary access control violation may result that malicious or untrustworthy packets enter a secure zone~\cite{Reitblatt2011}. 
+%%Another example is stateful firewall....
+%For performance, take the previous example again. 
+%If a packet enters switch $A$ while the forwarding loop exists. Note that in a realistic deployment, switches will refuse to forward packets back through their ingress port, but drop them. So the packet encounters a black hole at switch $B$ instead of a loop. A recent study~\cite{Flach2013} shows that TCP transfers with loss may take five times longer to complete compared with connections with no loss. That is, such bug may cause significant performance drop.
+%%\cite{OFCPP}
+%
+%We conduct some measurement study to show how seriously network uncertainty can cause performance drop. Results are shown in \S~\ref{sec:bug-coverage}. 
+%
+\subsection{Related Work}
+Researchers have investigated network verification techniques to rigorously check correctness of network software or configurations. Symbolic execution \cite{holzmann2004primer} can catch bugs through exploration of all possible code paths, but is usually not tractable for large software.
+Analysis of configuration files ~\cite{visser2003model, vasic2011identifying} is useful, but fails to find bugs in software of networking devices, and must be designed for specific configuration languages and control protocols. Another approach is to statically analyze snapshots of the network-layer states \cite{wang2011openflow, heller2010elastictree, mk+sigcomm+11, cadar2008klee, baier2008principles, flanagan2005dynamic, PHA2012}. However, those previous approaches operate offline, and thus, find bugs only after they happen. Online verification tools are also developed \cite{NetPlumber2013, Al-Shaer2010, VeriFlow} to check dynamic snapshots in real time. However, none of the existing tools take network temporary uncertainty into consideration.
+
+Another train of inquiry \cite{incremental-cu,Reitblatt2012, zUpdate, Hong13} focuses on how to synthesizes a correct update plan to avoid inconsistencies in data-plane, which may cause undetected transient faults in the network. However, their solutions are too expensive to achieve real-time performance with heavy flow table storage usage or long updates buffering time. In addition, the existing approaches are not designed to be flexible enough to verify generic network invariants. Reitblatt et al. \cite{reitblatt2013fattire} also proposed a language based on regular expressions for synthesizing fault-tolerant network programs, but the operations have to be performed offline.
+
+Other researchers have also noticed the problem of inconsistent view between SDN-controller and the network states. Peresini et al.~\cite{OFCPP} proposes a multi-commit transactional semantic at the controller for ensuring consistent packet processing. Heller et al.~\cite{sdnlayering} presents a big picture of cross-layer diagnostic framework for systematic troubleshooting in SDNs, and rigorous network-wide verification which we have explored in this paper, is an essential component towards that goal.
+
+
+%4. Stateful firewall (logic programming for SDN)	
+%
+%The key idea: the domain is able to send any traffic to the outside world, while an outside entity is only allowed to send traffic into the domain if the domain has first sent it a packet. 
+%
+%Model: one switch with two ports. Port 1: the external world, port 2 internal.
+%Any pkt that arrives on port 2 is routed to port 1. In addition, the firewall remembers the dst IP of such a packet. 
+%Any packet that arrives on port 1 is dropped unless the src IP matches one of the IPs that it has remembered. In this latter case, it forwards the pkt to port2.
+%
+%
+%Default rule: any traffic that comes in on port 2 to be forwarded out on port 1
+%Each pkt with a unique dst IP arriving at port 2 should be sent to the controller. When such a packet is processed, the run-time system extracts the dst IP and stores it as seen, and generates a specific rule that all traffic appearing on port 1 whose srcip field is IP is forwarded out port 2.
+%
+%Events: 1. client sends a pkt to server
+%
+%	2. SW sends this pkt to Controller
+%
+%3. Controller sees the pkt, stores dst ip IP, installs a rule that allows pkt whose srcip == IP from port1 to port2
+%
+%In VF: 	Init: 	for EC (c-->s) c-->SW-->s
+%
+%for EC (s-->c) c     SW<--s 
+%
+%after event 3, for EC (c-->s) c-->SW-->s
+%
+%for EC (s-->c) c<--SW<--s 
+%
+%But in reality, rule could arrive at SW after server’s response
+%
+%then for this pkt, EC(s->c) still c  SW<--s
+%
+%could be detected by VF with uncertainty
+

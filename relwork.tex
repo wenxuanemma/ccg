@@ -1,0 +1,55 @@
+\section{Related Work}
+\label{sec:relwork}
+
+\if 0
+Tools that make sure network correct via verification:
+
+1. Group one, off-line check static snapshots, e.g., Hassel, Anteator, ConfigChecker
+
+2. Group two, on-line check dynamic snapshots, e.g., VeriFlow, NetPlumber, FlowChecker
+
+Drawback: none considered uncertainty
+
+Work that synthesizes a correct update plan:
+
+1. Consistent updates, incremental, z-update, Chi-Yao's sigcomm 13
+
+Drawback: heavy, not flexible
+
+2. FatTire, Cornell's \wxzc{we can check with Anduo}
+
+Drawback: off-line
+
+Proposals work on similar problem:
+
+OF.CPP~\cite{OFCPP}: notice controller/netowrk inconsistency problem
+
+leveraging SDN layering~\cite{sdnlayering}: highlight the importance of verifying ... layer
+\fi
+
+Researcher have investigated network verification techniques to rigorously check correctness of network software or configurations. Symbolic execution \cite{holzmann2004primer} can catch bugs through exploration of all possible code paths, but is usually not tractable for large software. 
+Analysis of configuration files ~\cite{visser2003model, vasic2011identifying} is useful, but cannot find bugs in software of networking devices, and must be designed for specific configuration languages and control protocols. Another approach is to statically analyze snapshots of the network-layer states \cite{wang2011openflow, heller2010elastictree, mk+sigcomm+11, cadar2008klee, baier2008principles, flanagan2005dynamic, PHA2012}. However, those previous approaches operate offline, and thus find bugs only after they happen. Online verification tools are also developed \cite{NetPlumber2013, Al-Shaer2010, VeriFlow} to check dynamic snapshots in real time. However, none of the existing tools take network temporary uncertainty into consideration. 
+
+Another train of inquiry \cite{incremental-cu,Reitblatt2012, zUpdate, Hong13} focuses on how to synthesizes a correct update plan to avoid inconsistencies in data-plane, which may cause undetected transient faults in the network. However, their solutions are too expensive to achieve real-time performance with heavy flow table storage usage or long updates buffering time. In addition, the existing approaches are not designed to be flexible enough to verify generic network invariants. Reitblatt et al. \cite{reitblatt2013fattire} also proposed a language based on regular expressions for synthesizing fault-tolerant network programs, but the operations have to be performed offline. 
+
+Other researchers have also noticed the problem of inconsistent view between SDN-controller and the network states. Peresini et al.~\cite{OFCPP} proposes a multi-commit transactional semantic at the controller for ensuring consistent packet processing. Heller et al.~\cite{sdnlayering} presents a big picture of cross-layer diagnostic framework for systematic troubleshooting in SDNs, and rigorous network-wide verification which we have explored in this paper, is an essential component towards that goal.
+
+%Reitblatt et al. \cite{Reitblatt2012} proposed a technique by tagging each rule by a version number to ensures that switches forward packets using a consistent view of the network.
+
+%=================
+%10. High-Fidelity Switch Models for Software-Defined Network Emulation
+%We benchmark OpenFlow-enabled switches from three vendors
+%and illustrate how differences in their implementation
+%dramatically impact latency and throughput.
+%
+%5. Remy
+%we specify an uncertain model of network scenarios and a utility function of throughput and delay...
+%is it possible for a computer to discover the right rules...
+%should computers, rather than humans, be tasked with developing congestion control methods? And just how well can we make computers perform this task?
+%with/out the ability to adapt ... to ..., ... constraints ...
+%endpoints will adapt properly no matter what the lower layers do
+%model the possible network scenarios that... may encounter. this model may have different amount of uncertainty. evolve over time as networks mature
+%
+%3. logic programming for SDN
+%programmers must constantly consider whether (un)installing switch policies will affect other/future events monitored by the controller, and must explicitly coordinate multiple asynchronous events at the switches, to perform even simple tasks.
+%stateful firewall

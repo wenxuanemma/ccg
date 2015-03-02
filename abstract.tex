@@ -1,0 +1,74 @@
+\begin{abstract}
+
+It is critical to ensure that network policy remains consistent 
+during state transitions. However, existing techniques impose a high
+cost in update delay, and/or FIB space. 
+We propose the Customizable Consistency Generator (\name), 
+a fast and generic framework to support {\em customizable} consistency policies
+during network updates.
+%under temporal uncertainty about the network state.
+\name effectively reduces the task of {\em synthesizing} an update plan 
+under the constraint of a given consistency policy to a {\em verification} problem,
+by checking whether an update can safely be installed in the network at a particular time,
+and greedily processing network state 
+transitions to heuristically
+minimize transition delay. 
+We show a large class of consistency policies
+are guaranteed by this greedy heuristic alone;
+in addition, \name makes judicious use of existing heavier-weight
+network update mechanisms to provide guarantees when necessary.
+As such, \name
+nearly achieves the ``best of both worlds'': the efficiency
+of simply passing through updates in most cases, with
+the consistency guarantees of more heavyweight techniques.
+Mininet and physical testbed evaluations
+demonstrate \name's capability to achieve various types
+of consistency, such as path and bandwidth properties,
+with zero switch memory overhead and up to a $3\times$
+delay reduction compared to previous solutions.
+
+
+
+%Modern networks are dynamic. 
+%It is critical to ensure that network policy remains consistent during state transitions.
+%However, %as networks evolve,
+%the inherent distributed and asynchronous nature of networks causes
+%any single point incapable to control the exact timing of network events, 
+%any single point of the network uncertain about the 
+%instantaneous global state to some extent, thus making the problem harder.
+%ultimately leading to inconsistency between desired policy and actual network behavior.
+%The emergence of Software Defined Networking doesn't change the fact, 
+%despite having a logically centralized interface. 
+%Existing mechanisms only guarantee some fixed consistency notions, 
+%regardless of system requirement and performance overhead.
+
+%We propose the Customizable Consistency Constructor (\name), 
+%a fast and generic framework to support {\em customizable} consistency policies
+%as networks evolve.
+%during network transitions under temporal uncertainty about the network state.
+%\name leverages a black-box approach and 
+%introduces a graph-based uncertainty-aware network modeling technique.
+%\kevin{\name effectively reduces the task of synthesizing an update plan 
+%\cut{for preserving}
+%\wxznew{under the constraint of} any given consistency policy to a general verification problem.
+%We develop a novel network modelling technique allow us to reason networks even under temporal uncertainty, and build our verification engine based on it.
+%By checking whether an update can safely be applied in a network at a particular time, the basic scheduling component of \name greedily processes network %state transitions to heuristically minimize transition delay.}
+%For a given consistency policy, \name synthesizes an update plan that heuristically minimizes transition delay, \wxznew {by reducing a synthesis problem to a %verification problem.}
+%We identify the scope of consistency policies that are guaranteed by that heuristic.
+%\name also gives network operators a flexible choice to balance consistency and efficiency during network updates.
+%For policies out of that scope, \name triggers a heavyweight plug-in mechanism that guarantees the required policies, when and only when necessary.
+%In:addition, \name's greedy update scheduling algorithm can easily be integrated with existing network update mechanisms for significant speed improvements with the same level of consistency enforcement. 
+%In that way, \name nearly achieves the ``best of both worlds":
+%the efficiency of simply passing through updates in most cases,
+%with the consistency guarantees of more heavyweight techniques.
+%Both Mininet and physical testbed evaluations demonstrate \name's capability to achieve various types of consistency, such as trace and bandwidth properties, %with close to zero switch memory overhead and up to a factor 3x delay reduction compared to previous solutions.
+
+
+%The complexity of networks attract more and more efforts to make sure they behave correctly. 
+%One way to do so is to verify network-wide data plane state, 
+%which utilizes the uniform format of data plane and is able to detect control errors. 
+%However, none of the various data plane verification tools take the uncertainty into account.
+%They effectively assume that the updates are applied at exactly the moment the they see them.
+%In other word, being uncertain of the network status make some bugs neglected.
+
+\end{abstract}

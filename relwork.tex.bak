@@ -1,0 +1,141 @@
+\section{Related Work}
+\label{sec:relwork}
+
+% Recent works on debugging SDNs focus on detecting  
+% network anomalies using control-plane and/or data-plane information~\cite{Anteater2011, Al-Shaer2009}. 
+% Other works try to ensure 
+% data-plane consistency across all the devices~\cite{Nice2012} and allow different applications to run 
+% side-by-side in a non-conflicting manner~\cite{FlowVisor2010}. However, unlike \name, none of the existing 
+% solutions provide real-time verification of network-wide invariants as the network experiences 
+% dynamic changes. In this section, we discuss previous works that address various issues 
+% related to SDNs and deal with verification of network properties.
+
+Recent works on debugging SDNs focus on detecting network anomalies~\cite{Anteater2011, Al-Shaer2009}, 
+ensuring data-plane consistency~\cite{Nice2012}, and allowing different applications to run 
+side-by-side in a non-conflicting manner~\cite{FlowVisor2010}. However, unlike \name, none of the existing 
+solutions provide real-time verification of network-wide invariants as the network experiences 
+dynamic changes. 
+% In this section, we discuss previous works that address various issues 
+% related to SDNs and deal with verification of network properties.
+
+% \paragraphe{Programming OpenFlow networks: } NOX~\cite{Nox2008} is a network operating 
+% system that provides a programming interface to write controller applications for an 
+% OpenFlow network. NOX provides an API that is used by the applications to register for 
+% OpenFlow events and send OpenFlow commands to the switches. Frenetic~\cite{Frenetic2011} is 
+% a high-level programming language that can be used to write OpenFlow applications running 
+% on top of NOX. Frenetic allows OpenFlow application developers to express packet processing 
+% policies at a high-level that is not possible using only the NOX API. However, it only 
+% provides the language and the associated run time. Neither NOX nor Frenetic help in detecting 
+% bugs in the application code or other issues that may occur while the network is in operation. 
+% So, \name is orthogonal to these works as it can detect violations of network invariants 
+% while applications are running on a real network.
+
+% frenetic -- enables programming of openflow networks at high layer. doesn't prevent bugs, so veriflow is orthogonal/synergistic with this.
+
+\paragraphb{Checking OpenFlow applications:} 
+% Several tools have been proposed to find 
+% bugs in OpenFlow applications and to allow multiple applications run on the same physical 
+% network in a non-conflicting manner. 
+NICE~\cite{Nice2012} performs symbolic execution of 
+OpenFlow applications and applies model checking to explore the state space of an entire 
+OpenFlow network. Unlike \name, NICE is a proactive approach that tries to figure out 
+invalid system states by using a simplified OpenFlow switch model. It is not designed to 
+check network properties in real time. 
+% during the execution of the network 
+% Moreover, due 
+% to the use of model checking, NICE may face scalability issues when applied on general 
+% OpenFlow applications~\cite{Peresini2011}.
+
+FlowVisor~\cite{FlowVisor2010} allows multiple OpenFlow applications 
+% (both production and research/experimental applications) 
+to run side-by-side on the same physical infrastructure 
+without affecting each others' actions or performance. Like \name, FlowVisor acts as a proxy. 
+% and sits between the OpenFlow applications and switches. 
+% Every application starts its operation by 
+% sending a special \emph{slice} creation request specifying its resource requirements. FlowVisor 
+% tracks the resources it has allocated to each application, and ensures that an application 
+% can only use the resource that it is entitled to use and observe. FlowVisor achieves this 
+% by intercepting all the messages that are sent between the application and the switches, and 
+% rewrites them to enforce resource boundaries. 
+Unlike \name, FlowVisor 
+% does not verify the rules that applications send to the switches and 
+does not look for violations of key network invariants. 
+% FlowVisor is orthogonal to our project as it allows \name to check flow rules of 
+% only those applications that share overlapping rules due to the use of wildcards.
+
+% jrex nice -- slow and doesn't scale to general software (right?)
+% 
+% flowvisor -- allows multiple controller applications to run on the same network without affecting each others' actions.
+% Research applications can run side-by-side with production applications.
+
+% \paragraphe{Ensuring data-plane consistency: } Static analysis techniques using data-plane 
+% information suffer from the challenge of working on a consistent view of the network's 
+% forwarding state. Although this issue is less severe in SDNs due to their centralized 
+% controlling mechanism, inconsistencies in data-plane information may 
+% cause transient faults in the network that go undetected during the analysis phase. 
+% Reitblatt et al.~\cite{Reitblatt2011} proposed a technique that uses an idea similar to 
+% the one proposed by~\cite{John2008}. By tagging each rule by a version number, this 
+% technique ensures that switches forward packet using a consistent view of the network. 
+% Using this mechanism along with \name will ensure that whenever \name allows a set of rules 
+% to reach the switches, they will forward packets without any transient anomaly.
+
+\matt{
+\paragraphb{Data structures for efficient lookup}
+There has been much work on data structures for performing lookups, packet classification, and pattern matching at high speeds~\cite{varghesebook}.
+These structures include various forms of tries (e.g., Patricia, Lulea-Compressed, Variable-Stride), tree bitmaps, and hardware-supported structures (e.g., TCAM)
+for the purposes of fixed-length and variable-length prefix matching.
+Extensions to these structures (Hierarchical and Set-Pruning Tries, FIS-trees, Geometric Rule Classification) are used to perform more general packet classification
+across multiple fields. 
+\name builds upon these works to quickly isolate which paths are affected by a new rule across an entire network, based on the idea of computing sets of overlapping 
+{\em equivalence classes}.
+}
+
+\paragraphb{Checking network invariants:} 
+% There have been a few works on checking network 
+% properties and configurations using both control-plane and data-plane information. 
+The router 
+configuration checker (rcc)~\cite{Feamster2005} checks configuration files to detect faults that 
+may cause undesired behavior in the network. However, rcc cannot detect faults that only 
+manifest themselves in the data plane~\cite{Anteater2011} (e.g., bugs in router software 
+and inconsistencies between the control plane and the data plane). 
+% Please see~\cite{Anteater2011} for examples of such bugs.
+
+Anteater~\cite{Anteater2011} uses data-plane information of a network and checks for violations 
+of key network invariants. 
+% (absence of routing loops and black holes). 
+% It gathers data-plane 
+% information from each network device (switches, routers and firewalls) by accessing their 
+% internal forwarding table one by one, 
+Anteater converts the data-plane information into boolean expressions, 
+translates network invariants into instances of boolean satisfiability (SAT) problems and checks 
+the resultant SAT formulas using a SAT solver. Although Anteater can detect violations of 
+network invariants successfully, it is static in nature and does not scale well to dynamic 
+changes in the network (taking up to hundreds of seconds to check a single invariant). 
+% The run time reported in the Anteater paper is far from real time 
+% (taking up to hundreds of seconds to check a single invariant). 
+% Moreover, as the data-plane 
+% information at network devices may change during the information gathering phase, Anteater may fail 
+% to detect some transient faults (false negative), or may wrongly raise an alarm due to the 
+% inconsistency in the gathered data-plane information (false positive). As \name works within 
+% an SDN that has a consistent view of network state at the centralized controller, it is not 
+% affected by the aforementioned inconsistency issue.
+
+% Similar to Anteater, 
+ConfigChecker~\cite{Al-Shaer2009} and FlowChecker~\cite{Al-Shaer2010} 
+convert network rules 
+% (configuration and forwarding rules respectively) 
+into boolean expressions 
+in order to check network invariants. They use Binary Decision Diagram 
+(BDD) to model the network state, and run queries using Computation Tree Logic (CTL). \name uses 
+simpler techniques to verify network-wide invariants, and 
+% does it in a way that 
+handles dynamic changes in real time. Moreover, unlike previous solutions, \name \emph{prevents} 
+problems from hitting the forwarding plane. 
+% , whereas Anteater and FlowChecker find problems after they occur and (potentially) cause damage. 
+% ConfigChecker, like rcc, cannot detect problems that only affect the data plane.
+
+% anteater -- very slow. Also, anteater has the problem that if FIBs change while being collected, Anteater can get an inconsistent view of the network. 
+% By having information centralized at the controller, and leveraging existing techniques to consistently propagate it into hte network, we dont have that problem.
+% also, veriflow {\em prevents} problems from hitting the forwarding plane; anteater only finds them after they occur and (potentially) cause damage.
+% 
+% jrex xie -- 

@@ -1,0 +1,35 @@
+\section{Conclusion}
+\label{sec:conclusion}
+%In this paper, 
+We present \name, a system that enforces customizable network consistency properties 
+with high efficiency.
+We highlight the network uncertainty problem and its ramifications, 
+and propose a network modeling technique correctly derives consistent outputs even in the presence
+of uncertainty.
+%We argue it is a crucial task to keep network consistent under uncertainty, 
+%and propose \name as a framework to ensure customizable consistency notion.
+%Any consistency invariant is specified as a black-box plugged into \name.
+The core algorithm of \name leverages the uncertainty-aware network model, 
+%and the outputs of the specific black-box, 
+and synthesizes a feasible network update plan (ordering and timing of control messages).
+In addition to ensuring that there are no violations of consistency requirements,
+\name also tries to maximize update parallelism, subject to the constraints imposed by the requirements.
+Through emulations and experiments on an SDN testbed, 
+we show that \name is capable of achieving a better consistency vs.
+efficiency trade-off than existing mechanisms.
+\cut{Also, it is known~\cite{Mahajan13} that certain update sequences can be
+processed without use of external mechanisms. Our experimental results provide
+validation of this observation over additional properties and environments. 
+In future work, we plan to develop a theoretical framework to analyze
+the consistency property space to explore the efficiency-consistency
+relationship.}
+
+
+%Also, from the experimental results, we observe that for some consistency properties, 
+%a feasible update plan is always available without tranlated by a heavy mechanism first.
+%This motivates our future work to theoretically expore the consistency property space to find out the 
+%efficiency-consistency relationship.
+
+
+%As future work...
+
