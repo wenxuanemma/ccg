@@ -14,8 +14,8 @@ In fact, one can use \name even when fallback is always on.
 In this case, \name will be faster most of the time, as discussed in \S\ref{sec:synthesis}. 
 
 \paragraphb{Related work:}
-Among the approaches mentioned in \S\ref{sec:motivation}, four warrant further discussion.
-Most closely related and concurrent with our work \fixme{not really; Dionysus was published before we submitted} is Dionysus~\cite{jin2014dynamic}, a dependency-graph based approach that achieves a goal similar to ours. As discussed in \S\ref{sec:motivation}, our approach has the ability to support 1) flexible properties with high efficiency without the need to implement new algorithms, and 2) applications with wildcarded rules.
+Among the related approaches\cut{ mentioned in \S\ref{sec:motivation}}, four warrant further discussion.
+Most closely related to our work\cut{\fixme{not really; Dionysus was published before we submitted}} is Dionysus~\cite{jin2014dynamic}, a dependency-graph based approach that achieves a goal similar to ours. As discussed in \S\ref{sec:motivation}, our approach has the ability to support 1) flexible properties with high efficiency without the need to implement new algorithms, and 2) applications with wildcarded rules.
 \cite{mcclurg15} also plans updates in advance, but using model checking. It, however, does not account for the unpredictable time switches take to perform updates.
 In our implementation, CU~\cite{Reitblatt2012} and VeriFlow~\cite{VeriFlow} are chosen as the fallback mechanism and verification engine. Nevertheless, they are replaceable components of the design. For instance, when congestion freedom becomes the property of interest, we can replace CU with SWAN~\cite{Hong13}.  
 
