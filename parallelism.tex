@@ -3,38 +3,15 @@
 %\section{Verification and Consistency under Uncertainty}
 \section{Consistency under Uncertainty}
 
-%The previous sections described our modeling approach.
-\if 0
-In this section, we describe how to leverage our model to build useful tools.
-First (\S\ref{sec:verify}), we describe how our model can be used to perform
-safe, uncertainty-aware network verification.
-Then (\S\ref{sec:parallelism}~\S\ref{sec:synthesis}), we describe how to 
-leverage our model to efficiently synthesize update sequences
-that obey a set of provided invariants.
-\fi
-\kevin{
-Now we describe how we use our model
-%to perform
-%uncertainty-aware network verification (\S\ref{sec:verify}),
-%then 
-to efficiently synthesize update sequences that obey a set of provided invariants (\S\ref{sec:parallelism}). Next, we identify the scope of invariants that can be guaranteed with heuristically maximized updating speed (\S\ref{sec:seg-independence}), and present our technique to preserve consistency for the remaining invariants (\S\ref{sec:synthesis}).}
+\pbg{In this section, we describe how we use our model to efficiently synthesize update sequences that obey a set of provided invariants (\S\ref{sec:parallelism}).  We then identify a class of invariants that can be guaranteed in this manner (\S\ref{sec:seg-independence}), and present our technique to preserve consistency for broader types of invariants (\S\ref{sec:synthesis}).}
 
-
-\subsection{Enforcing Correctness with Maximized Parallelism}
+\subsection{Enforcing Correctness with \pbg{Heuristically} Maximized Parallelism}
 \label{sec:parallelism}
 
-%\cut{
-%The previous section described how to verify network correctness, with general invariants, using our model.
-The key goal of our system is to {\em instill}
-%flexible and 
+The key goal of our system is to pbg{instill}
 user-specified notions of correctness during network transitions.
-%Doing this can ensure networks {\em continuously} obey general consistency properties
-%even during network changes, and 
-%even while the state of the network is converging. 
-%\wxzc{what does "even while the state of the network is converging" mean?}
 
 Using our model to perform this task is also relatively straightforward.
-%In particular, 
 We can construct a {\em buffer} of updates received from the application,
 and attempt to send them out in FIFO order. Before each update is sent, we check with the
 verification engine on whether there is any possibility, given the uncertainty in network state, sending it could result in an invariant violation. If so, the update remains buffered until it is safe to be sent.
