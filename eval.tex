@@ -54,7 +54,7 @@ We used Mininet to emulate a fat-tree network with a shortest path routing appli
 %\cut{fully connected with} 
 and ten edge switches, and each edge switch connects to five hosts. %To initialize the flow table for each switch, each host first picked up a random destination host to perform a file transfer. 
 Once the rules were stable in the switches, we changed the network (e.g., add links, or migrate hosts) to trigger the controller to update the data plane with a set of new updates. %We measured the delay that the new rules took to be applied to the network. 
-For each set of experiments, we tested six update mechanisms: (1) the controller immediately issues updates to the network (``Optimal" in terms of update speed); (2) \name with the basic connectivity invariant (loop and black-hole freedom) verification enabled (\name); (3) \name with an additional invariant that packets must traverse a specific middle hop before reaching the destination (\name-waypoint); (4) Consistent Updates (CU)~\cite{Reitblatt2012}; (5) incremental Consistent Updates (Incremental CU)~\cite{incremental-cu}; and (6) Dionysus \cite{jin2014dynamic} with its WCMP forwarding dependency graph generator.
+For each set of experiments, we tested six update mechanisms: (1) the controller immediately issues updates to the network, which is \textbf{Optimal} in terms of update speed; (2) \textbf{\name} with the basic connectivity invariant (loop and black-hole freedom) verification enabled (\name); (3) \name with an additional invariant that packets must traverse a specific middle hop before reaching the destination (\name-waypoint); (4) Consistent Updates (\textbf{CU})~\cite{Reitblatt2012}; (5) incremental Consistent Updates (\textbf{Incremental CU})~\cite{incremental-cu}; and (6) \textbf{Dionysus} \cite{jin2014dynamic} with its WCMP forwarding dependency graph generator.
 \wxznew{We configure our applications as the same type as in Dionysus, with
 forwarding rules matching exactly one flow, i.e., no overlapping forwarding
 graphs. Thus, loop and black-hole freedom are segment-independent as proved in
@@ -112,7 +112,7 @@ with 25ms jitter), and repeated the same tests (Figure \ref{fig:emulation}(b)).
 As for Dionysus, 
 we observed in Figure~\ref{fig:emulation}
 that it speeds up updates compared to CU in both local and wide-area
-settings, as it reacts to network dynamics rather than pre-determineing a
+settings, as it reacts to network dynamics rather than \pbg{pre-determining} a
 schedule. But because its default algorithm for WCMP forwarding produces
 basically the same number of updates as CU, 
 \name (either \name or \name-waypoint)
@@ -129,10 +129,10 @@ Here, Dionysus does not outperform CU because
 it adjusts its schedule according to network dynamics, 
 which was almost absent in this scenario.
 The cost of generating dependency graphs in this scenario
-is relatively large compared to the small network delay.
+is relatively large compared to the small network delay. \fixme{you are including compute time in the evaluation?  That's OK, but explain it}
 When the mean delay was larger (100ms), even with no jitter,
 Dionysus managed to speed the transition by updating each forwarding path independently.}
-On the other hand, \name's performance is closer to the Optimal case than Dionysus. For example, in the $(4, 0)$ case,  \name is 37\%, 38\%, and 52\% faster than Dionysus in the $50^{th}$, $90^{th}$ and $99^{th}$ percentile, respectively; in the $(100, 25)$ case,  \name is 50\%, 50\%, and 53\% faster than Dionysus in the $50^{th}$, $90^{th}$ and $99^{th}$ percentile, respectively. Also, we observe that Dionysus's performance is highly dependent on the variance of the controller-switch delay (the larger the jitter is, the faster the update speed) because of the dynamic scheduling, but \name's performance is insensitive to the jitter.
+On the other hand, \name's performance is closer to \pbg{Optimal} than Dionysus. For example, in the $(4, 0)$ case,  \name is 37\%, 38\%, and 52\% faster than Dionysus in the $50^{th}$, $90^{th}$ and $99^{th}$ percentile, respectively; in the $(100, 25)$ case,  \name is 50\%, 50\%, and 53\% faster than Dionysus in the $50^{th}$, $90^{th}$ and $99^{th}$ percentile, respectively. Also, we observe that Dionysus's performance is highly dependent on the variance of the controller-switch delay (the larger the jitter is, the faster the update speed) because of the dynamic scheduling, but \name's performance is insensitive to the jitter.
 
 \begin{figure}[!ht]
   \centering
