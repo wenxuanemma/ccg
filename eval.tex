@@ -65,6 +65,10 @@ so the waypoint policy is also segment independent.}
 \wxzcr{A mix of old and new configurations, e.g., 
 $oldAB + newBC$ in Figure~\ref{fig:circular}(a), 
 is allowed by \name, but forbidden when using CU.}
+\wxzcrnew{Note here, we used our implementation of the algorithms introduced in Dionysus paper,
+which supports packet coherence.
+That is, with extra effort, one can develop algorithms that build customized dependency graphs 
+for weaker properties, and thus achieve better efficiency.}
 
 %The CU we used was modified from an implementation developed at Stanford University \cite{standford_cu_imp}. Each experiment was repeated 10 times and we plotted the experimental results in the form of CDF. 
 

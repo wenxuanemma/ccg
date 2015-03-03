@@ -19,8 +19,9 @@ Most closely related to our work\cut{\fixme{not really; Dionysus was published b
 \cite{mcclurg15} also plans updates in advance, but using model checking. It, however, does not account for the unpredictable time switches take to perform updates.
 In our implementation, CU~\cite{Reitblatt2012} and VeriFlow~\cite{VeriFlow} are chosen as the fallback mechanism and verification engine. Nevertheless, they are replaceable components of the design. For instance, when congestion freedom is the property of interest, we can replace CU with SWAN~\cite{Hong13}.  
 
-\paragraphb{Future work:} We plan to study the generality of {\em segment independent} properties both theoretically and practically, test \name with more data traces, and extend its model to handle changes initiated from the network. We will also investigate 
-utilizing possible primitives in network hardware to facilitate consistent updates.
+\paragraphb{Future work:} We plan to study the generality of {\em segment independent} properties both theoretically and practically, test \name with more data traces, and extend its model to handle changes initiated from the network.
+\wxzcrnew{As comparison, we will test \name against the original implementation of Dionysus with dependency graphs customized to properties of interest.}
+We will also investigate utilizing possible primitives in network hardware to facilitate consistent updates.
   \vspace{-0.1in}
 }
 

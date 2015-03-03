@@ -60,10 +60,36 @@ controller?
 
 %In this way, CU guarantees that packet behaviors satisfy a property at every step during network configuration changes, as long as the start and final state satisfy the property. But this comes at the price of efficiency and with a rigid notion of consistency as we will see in the following sections.}
 
+%\subsection{Customizable Consistency Properties}
+%\label{sec:general}
+\paragraphb{2) Customizable Consistency Properties.}
+Moreover, the range of desired consistency properties of networks is quite broad and diverse. 
+For example,
+the successful operations of some networks 
+may depend on a set
+of paths traversing a firewall, certain ``classified" hosts being
+unreachable from external domains, enforcement of access control to
+ensure critical assets, balanced load across links, loop freedom, etc..
+%depend on loop freedom, balanced
+%load across links, use of optimal routes, enforcement of access control to
+%secure critical assets, or a combination of several of these.
+%Existing mechanisms deals with different consistency properties, individually.
+%and their focuses are in isolation.
+As argued in~\cite{Mahajan13}, a generic framework to handle general properties
+is needed.  Researchers have attempted to ensure certain types of consistency
+properties, e.g., loop freedom, absence of packet
+loss~\cite{zUpdate, zUpdate, Hong13}, 
+but those studies do not provide a generalized solution.
+\wxznew{Dionysus~\cite{jin2014dynamic}, as stated earlier, generalizes the scope of 
+consistency properties it deals with, but still requires designing 
+specific algorithms for different invariants.}
+\wxzcrnew{Consistent Updates~\cite{Reitblatt2012} is probably the closest solution to
+support general consistency properties, but as we will see next, it sacrifices efficiency.}
 %\subsection{Efficient Update Installation} 
 %\subsection{Maximizing Control Throughput} 
-%\label{sec:efficient} 
-\paragraphb{2) Efficient Update Installation.}
+%\label{sec:efficient}
+
+\paragraphb{3) Efficient Update Installation.}
 %Network changes in SDN can occur frequently, triggered by the control applications,
 %changes in traffic load, system upgrades, or even failures.
 %Accordingly, they 
@@ -133,29 +159,6 @@ exact match on flows or classes of flows.
 %As a stream of flows arrive, the operator %cannot afford waiting 
 %needs to wait for the two-phase update delay (taking at least one and half round trip times between the controller and switches plus the rule installation time) before allowing each flow to enter the network.
 
-%\subsection{Customizable Consistency Properties}
-%\label{sec:general}
-\paragraphb{3) Customizable Consistency Properties.}
-The range of desired consistency properties of networks is quite broad and diverse. 
-For example,
-the successful operations of some networks 
-may depend on a set
-of paths traversing a firewall, certain ``classified" hosts being
-unreachable from external domains, enforcement of access control to
-ensure critical assets, balanced load across links, loop freedom, etc..
-%depend on loop freedom, balanced
-%load across links, use of optimal routes, enforcement of access control to
-%secure critical assets, or a combination of several of these.
-%Existing mechanisms deals with different consistency properties, individually.
-%and their focuses are in isolation.
-As argued in~\cite{Mahajan13}, a generic framework to handle general properties
-is needed.  Researchers have attempted to ensure certain types of consistency
-properties, e.g., loop freedom, packet coherence, absence of packet
-loss~\cite{Reitblatt2012, zUpdate, incremental-cu, zUpdate, Hong13}, 
-but those studies do not provide a generalized solution.
-\wxznew{Dionysus~\cite{jin2014dynamic}, as stated earlier, generalizes the scope of 
-consistency properties it deals with, but still requires designing 
-specific algorithms for different invariants.}
  %\if 0
  %However, aforementioned schemes, like CU, preserve a fairly rigid requirement,
  %which may not always be suitable for applications.  On one hand, the
