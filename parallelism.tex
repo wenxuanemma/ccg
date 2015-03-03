@@ -5,21 +5,18 @@
 
 \pbg{In this section, we describe how we use our model to efficiently synthesize update sequences that obey a set of provided invariants (\S\ref{sec:parallelism}).  We then identify a class of invariants that can be guaranteed in this manner (\S\ref{sec:seg-independence}), and present our technique to preserve consistency for broader types of invariants (\S\ref{sec:synthesis}).}
 
-\subsection{Enforcing Correctness with \pbg{Heuristically} Maximized Parallelism}
+\subsection{Enforcing Correctness with \pbg{Greedily} Maximized Parallelism}
 \label{sec:parallelism}
 
-The key goal of our system is to pbg{instill}
-user-specified notions of correctness during network transitions.
-
-Using our model to perform this task is also relatively straightforward.
-We can construct a {\em buffer} of updates received from the application,
+The key goal of our system is to \pbg{instill}
+user-specified notions of correctness during network transitions.  \pbg{The basic idea is
+relatively straightforward.  We} construct a {\em buffer} of updates received from the application,
 and attempt to send them out in FIFO order. Before each update is sent, we check with the
-verification engine on whether there is any possibility, given the uncertainty in network state, sending it could result in an invariant violation. If so, the update remains buffered until it is safe to be sent.
+verification engine on whether there is any possibility, given the uncertainty in network state, \pbg{that} sending it could result in an invariant violation. If so, the update remains buffered until it is safe to be sent.
 
 There are two key problems with this approach.
 The first is head-of-line blocking: it may be safe to send an update, but one before it in the queue, which isn't safe, could block it. This introduces additional delays in propagating updates
 to the network.
-%, which slows the convergence process and reaction to events.
 Second, only one update is sent at a time, which is wasteful---if groups of updates do not conflict with each other, they could be sent in parallel.
 
 To address this,
@@ -168,7 +165,7 @@ practice.}
                 \State $G_{uncertain}$ = ExtractGraph($Model, u_b$)
                 \State $verify$ = BlackboxVerification($G_{uncertain}, u_b$)
                 \If {$verify$ == PASS }
-                        \State $Buf$ removes $u_b$
+                        \State \pbg{Remove $u_b$ from $Buf$}
                         \State Update($Model, u_b, uncertain$)
                         \State $Issue\_updates \gets Issue\_updates + u_b$
                 \EndIf
@@ -182,10 +179,8 @@ practice.}
 \subsection{Segment Independence}
 \label{sec:seg-independence}
 
-Next, we identify consistency policies that guarantee
-the existence of feasible update orders, 
-and prove \name's heuristic guarantees to find one such order.
-As defined in \cite{Reitblatt2012}, {\em trace properties} characterizes
+Next, we identify \pbg{a class of invariants for which a feasible update ordering exists, and for which \name's heuristic will be guaranteed to find one such order}.
+As defined in \cite{Reitblatt2012}, {\em trace properties} \pbg{characterize}
 the paths that packets traverse through the network.  This covers many common network properties, including reachability, access control, loop freedom, and waypointing.
 %including basic reachability, access control, loop freedom, VLAN leak freedom, waypointing, \kevin{and many more}.
 %Our discussion will first focus on trace properties, and then extend to other properties,
@@ -193,9 +188,10 @@ the paths that packets traverse through the network.  This covers many common ne
 \wxzcr{We start with the assumption that a network configuration 
 applies to exactly one equivalence class of packets.}
 A network configuration can be expressed as a set of paths that packets are allowed to take,
-i.e., a forwarding graph, 
+i.e., a forwarding graph.
 A configuration transition is equivalent to a transition from an initial forwarding graph, $G_0$,
-to a final graph, $G_f$, through a series of transient graphs, $G_t$s. 
+to a final graph, $G_f$, through a series of transient graphs, \pbg{$G_t$, for $t\in\{1,\ldots,f-1\}$}.  \pbg{We assume throughout that the invariant of interest is preserved
+in $G_0$ and $G_f$.}
 %Let us start from two specific trace properties: loop freedom and black-hole freedom.
 
 \paragraph{Loop and black-hole freedom}
@@ -204,7 +200,7 @@ to a final graph, $G_f$, through a series of transient graphs, $G_t$s.
 %For loop freedom, 
 The following theorems were proved for loop freedom~\cite{loopfree}:
 First, given both $G_0$ and $G_f$ are loop-free,
-during transition, it is safe (causing no loop) to update a node in a $G_t$ if that node satisfies 
+during transition, it is safe (causing no loop) to update a node in \pbg{any} $G_t$, if that node satisfies 
 one of the following two conditions: (1) in $G_t$ it is a leaf node, or all its upstream nodes
 have been updated with respect to $G_f$; or (2) in $G_f$ it reaches the destination directly,
 or all its downstream nodes in $G_f$ have been updated with respect to $G_f$.
@@ -265,7 +261,7 @@ downstream nodes and
 %assumption. 
 %After updating $N_a$, 
 all nodes in the chain from $N_a$ to $N_n$ have been updated. % with respect to $G_f$. 
- $Na$'s upstream with respect to $G_t$ can still reach $N_a$, and thus reach the downstream of $N_a$.
+ $N_a$'s upstream with respect to $G_t$ can still reach $N_a$, and thus reach the downstream of $N_a$.
 If we assume there is a black-hole from updating $N_a$,
 there exists a black-hole in the chain from $N_a$ to $N_n$.
 Therefore, the black-hole will exist in 
@@ -276,13 +272,12 @@ $G_f$, and there is a contradiction.
 
 
   \vspace{-0.1in}
-\begin{lemma} (Simultaneous updates): In
-a $G_t$, any update order among updatable nodes is black-hole-free.  
+\begin{lemma} (Simultaneous updates): \pbg{Starting with any $G_t$,} any update order among updatable nodes is black-hole-free.  
 \end{lemma}
   \vspace{-0.1in}
 
   \vspace{-0.1in}
-\begin{proof} Consider a updatable node $N_a$ that all its downstream nodes in
+\begin{proof} Consider a updatable node $N_a$ \pbg{such} that all its downstream nodes in
 $G_f$ have already been updated in $G_t$ (Lemma 1). 
 Then updating any other updatable node does not change this
 property. When a node is updatable it remains updatable even after updating
@@ -407,7 +402,7 @@ Then $n$ waypoints divide both the old and new paths into $(n - 1)$ {\em segment
 
   \vspace{-0.1in}
 \begin{definition} {\bf Waypoints-based trace property:} A property
-that enforces a group of packets traverse a set of
+that \pbg{specifies that} a group of packets \fixme{What do we mean by ``group''?  Do we just mean each packet individually should do this, or is there something the group does together?  If it is just a single packet, replace ``a group of packets'' with ``each packet''} \pbg{should} traverse a set of
 waypoints (including source and destination) in a particular order.
 \end{definition}
   \vspace{-0.1in}
@@ -437,7 +432,7 @@ waypoints (including source and destination) in a particular order.
   \vspace{-0.1in}
 \begin{definition} 
 {\bf Segment dependency:}
-Suppose a trace property enforces $n$ waypoints, 
+Suppose a trace property \pbg{specifies} $n$ waypoints, 
 which divide the old and the new flow path each into $(n - 1)$ segments:
 $old_1, old_2, ..., old_{n - 1}$ and $new_1, new_2, ..., new_{n - 1}$.
 If $new_j$ crosses $old_i$ ($i \ne j$), then the update of segment $j$ is 
