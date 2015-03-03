@@ -28,11 +28,12 @@
 \paragraphb{1) Consistency at Every Step.}
 \wxzcr{Network changes can occur frequently, \cut{expecially in SDNs, }triggered by the control applications,
 changes in traffic load, system upgrades, or even failures.}
-The asynchronous and distributed nature of modern networks implies that no single
+\wxzcrnew{Even in SDNs with a logically centralized controller,}
+the asynchronous and distributed nature\cut{ of modern networks} implies that no single
 component can always obtain a fully up-to-date view of the entire system.
 %always obtain a correct instantaneous network-wide view. 
-The emergence of SDN, despite providing a logically centralized management interface, 
-does not change that fact~\cite{Nice2012}. \fixme{What fact are we backing up with that citation?}
+%The emergence of SDN, despite providing a logically centralized management interface, 
+%does not change that fact~\cite{Nice2012}. \fixme{What fact are we backing up with that citation?}
 %Thus, our observation of a network, for example, from an SDN controller, is uncertain at any given time. 
 %The root cause is the inevitable delays between the controller and network devices,
 %, as well as the unpredictable  \wxzc{as well as rule installation time}
@@ -77,7 +78,8 @@ to minimize the duration of performance drops and network errors.
 %That is, }correctness and efficiency are two sides of the same coin, 
 %and both are crucial to network management. 
 There have been proposals~\cite{Reitblatt2012, incremental-cu, zUpdate, Hong13, noyes2014toward} that instill correctness according to a specific consistency property, but these approaches suffer substantial performance penalties. 
-For example, the total waiting time of the
+For example, 
+\wxzcrnew{the waiting time between phases using the}
 two-phase update scheme proposed in CU~\cite{Reitblatt2012} is at least the maximum delay across all the devices, assuming a completely
 parallel implementation. \pbgc{Rephrase}
 %\cut{While preserving correctness properties, network
@@ -85,7 +87,7 @@ parallel implementation. \pbgc{Rephrase}
 Dionysus \cite{jin2014dynamic} was recently proposed to update networks via dynamic scheduling atop a consistency-preserving dependency graph.
 %\cut{ 
 %For each particular invariant, Dionysus requires a dependency graph and an algorithm specific to that invariant. For example, a packet coherence invariant needs one algorithm and a waypoint invariant would need a new algorithm.}
-However, Dionysus requires implementing a new algorithm and dependency graph for each new invariant to achieve good performance. 
+However, it requires implementing a new algorithm and dependency graph for each new invariant to achieve good performance. 
 For example, a packet coherence invariant needs one algorithm and a waypoint invariant would need another algorithm.
 %'s efficiency 
 %depends on how specific the algorithm that generates the graph is to the invariant one cares about. 

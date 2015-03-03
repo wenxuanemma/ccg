@@ -15,8 +15,8 @@ and attempt to send them out in FIFO order. Before each update is sent, we check
 verification engine on whether there is any possibility, given the uncertainty in network state, \pbg{that} sending it could result in an invariant violation. If so, the update remains buffered until it is safe to be sent.
 
 There are two key problems with this approach.
-The first is head-of-line blocking: it may be safe to send an update, but one before it in the queue, which isn't safe, could block it. This introduces additional delays in propagating updates
-to the network.
+The first is head-of-line blocking: it may be safe to send an update, but one before it in the queue, which isn't safe, could block it. This introduces additional delays in propagating updates.
+\cut{to the network.}
 Second, only one update is sent at a time, which is wasteful---if groups of updates do not conflict with each other, they could be sent in parallel.
 
 To address this,
@@ -205,7 +205,7 @@ one of the following two conditions: (1) in $G_t$ it is a leaf node, or all its 
 have been updated with respect to $G_f$; or (2) in $G_f$ it reaches the destination directly,
 or all its downstream nodes in $G_f$ have been updated with respect to $G_f$.
 Second, if there are several updatable nodes in a $G_t$, any update order among these nodes is
-loop-free. Third, in any loop-free $G_t$ (including $G_0$) that is not equal to $G_f$,
+loop-free. Third, in any loop-free $G_t$ (including $G_0$) that is not $G_f$,
 there is at least one node safe to update, i.e., a loop-free update order always exists.
 
 %. That is, there always exists a loop-free update order.

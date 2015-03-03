@@ -41,8 +41,12 @@ to keep them correct even during transitions.}
 %out when things go wrong, but humans are still involved in the repair process,
 %lengthening the time to fix the problem, and introducing potential faults
 %during the process.%As networks are dynamic, it is even harder to keep them working correctly.
-Thus, the challenge is to preserve properties even during
-network state transitions, which we refer to as maintaining {\em network consistency}. \fixme{This sounds like we came up with the term.  Also this sounds more like correctness than consistency.}
+\wxzcrnew{Thus, the challenge is to guarantee correct transitions, i.e., 
+properties are preserved consistently over time, which has been referred as 
+%Thus, the challenge is to preserve properties even during
+%network state transitions, which we refer to as maintaining 
+{\em network consistency}~\cite{Reitblatt2012}.} 
+\fixme{This sounds like we came up with the term.  Also this sounds more like correctness than consistency.}
 
 Several recent proposed systems~\cite{Reitblatt2012,incremental-cu,zUpdate, Hong13}
 consistently update software-defined networks (SDNs), 
@@ -89,7 +93,9 @@ We take a very different approach that begins with an observation:
 synthesizing consistent updates for arbitrary consistency policies
 is hard, but network verification on general policies is comparatively easy,
 especially now that multiple real-time data plane verification 
-tools~\cite{VeriFlow, Al-Shaer2010, NetPlumber2013} \fixme{We cite Al-Shaer; does that paper operate in milliseconds?} can verify very generic data-plane properties of a network
+tools~\cite{VeriFlow, Al-Shaer2010, NetPlumber2013}
+% \fixme{We cite Al-Shaer; does that paper operate in milliseconds?} 
+can verify very generic data-plane properties of a network
 state within milliseconds. In fact, as also occurs in domains outside of networking, 
 there is a connection between synthesis and verification. 
 A feasible update sequence is one which the relevant properties are verifiable at each moment in time.
