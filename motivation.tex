@@ -63,13 +63,13 @@ controller?
 %\subsection{Customizable Consistency Properties}
 %\label{sec:general}
 \paragraphb{2) Customizable Consistency Properties.}
-Moreover, the range of desired consistency properties of networks is quite broad and diverse. 
+\pbg{The} range of desired consistency properties of networks is quite \pbg{diverse}. 
 For example,
 the successful operations of some networks 
 may depend on a set
 of paths traversing a firewall, certain ``classified" hosts being
 unreachable from external domains, enforcement of access control to
-ensure critical assets, balanced load across links, loop freedom, etc..
+\pbg{protect} critical assets, balanced load across links, loop freedom, etc.
 %depend on loop freedom, balanced
 %load across links, use of optimal routes, enforcement of access control to
 %secure critical assets, or a combination of several of these.
@@ -77,14 +77,14 @@ ensure critical assets, balanced load across links, loop freedom, etc..
 %and their focuses are in isolation.
 As argued in~\cite{Mahajan13}, a generic framework to handle general properties
 is needed.  Researchers have attempted to ensure certain types of consistency
-properties, e.g., loop freedom, absence of packet
-loss~\cite{zUpdate, zUpdate, Hong13}, 
+properties, e.g., loop freedom or absence of packet
+loss~\cite{zUpdate, Hong13},
 but those studies do not provide a generalized solution.
-\wxznew{Dionysus~\cite{jin2014dynamic}, as stated earlier, generalizes the scope of 
+Dionysus~\cite{jin2014dynamic}, as stated earlier, generalizes the scope of 
 consistency properties it deals with, but still requires designing 
-specific algorithms for different invariants.}
-\wxzcrnew{Consistent Updates~\cite{Reitblatt2012} is probably the closest solution to
-support general consistency properties, but as we will see next, it sacrifices efficiency.}
+specific algorithms for different invariants.
+Consistent Updates~\cite{Reitblatt2012} is probably the closest solution to
+support general consistency properties \pbg{because it provides the relatively strong property of packet coherence which is sufficient to guarantee many other properties;} but as we will see next, it sacrifices efficiency.
 %\subsection{Efficient Update Installation} 
 %\subsection{Maximizing Control Throughput} 
 %\label{sec:efficient}
@@ -107,7 +107,7 @@ There have been proposals~\cite{Reitblatt2012, incremental-cu, zUpdate, Hong13, 
 For example, 
 \wxzcrnew{the waiting time between phases using the}
 two-phase update scheme proposed in CU~\cite{Reitblatt2012} is at least the maximum delay across all the devices, assuming a completely
-parallel implementation. \pbgc{Rephrase}
+parallel implementation.
 %\cut{While preserving correctness properties, network
 %operators also wish to perform network operations in the most efficient manner.}
 Dionysus \cite{jin2014dynamic} was recently proposed to update networks via dynamic scheduling atop a consistency-preserving dependency graph.
