@@ -48,12 +48,12 @@ uncertainty-aware network verification (\S\ref{sec:verify}).}
 %Last, VeriFlow traverses each of these graphs,
 %to verify network-wide invariants.
 
-\subsection{Network Uncertainty}
+\subsection{The Network Uncertainty Problem}
 \label{sec:uncertainty}
 
-We first describe the problem of network uncertainty and the negative effects of neglecting it.
+%We first describe the problem of network uncertainty and the negative effects of neglecting it.
 % on network-wide verification. 
-It takes time in networks to disseminate states among distributed and asynchronous devices,
+\pbg{Networks must disseminate state} among distributed and asynchronous devices,
 which leads to the inherent \emph{uncertainty} that an observation point
 %\cut{tasked with instilling updates consistently into the network, e.g., }
 has in knowing the current state of the network. %\kevinc{I prefer to remove the sentence ``which leads to ... by the network".}
@@ -156,8 +156,7 @@ transfers with loss may take five times longer to complete.
 Other transient errors could violate security policy, e.g., malicious packets could enter a secure zone because of a temporary access control violation~\cite{Reitblatt2012}.}
 
 To make matters worse, errors caused by unawareness of network temporal uncertainty can be permanent. 
-For instance, a control program initially instructs a switch to install one rule, and later removes that rule.%then asks the switch to remove that rule.
-%The problem is that 
+For instance, a control program initially instructs a switch to install one rule, and later removes that rule.
 The two instructions can be reordered at the switch~\cite{verified-pldi13}, %so that the switch first removes a non-existing rule, 
 \kevin{which ultimately causes the switch to install a rule that ought to be removed.} %resulting a state against the control program's intention. 
 %Without querying the flow table at the switch, 
@@ -212,23 +211,21 @@ race conditions that violate an invariant} (\S\ref{sec:impl}).
 
 %For every update, assuming the controller is able to figure out whether the update is applied in the network after issuing it, there is a period of time during which the controller is uncertain about the state of the network. 
 
-\wxzcr{
-We first briefly introduce our prior work VeriFlow, a real-time network-wide verifier.
+We first briefly introduce our prior work VeriFlow, a real-time network-wide \pbg{data plane} verifier.
 VeriFlow intercepts every update issued by the controller before it hits the network and 
-verifies its effect in real-time.
+verifies its effect in real time.
 VeriFlow first
-slices the entire packet space into a set of Equivalence Classes (ECs) of packets
+slices \pbg{the set of possible packets into} Equivalence Classes (ECs) of packets
 using all existing forwarding rules and the new update.
 Each EC is a set of packets that experiences the same forwarding actions throughout the network.
 %Because each update typically affects a very small number of ECs, 
 %to limit searching space,
 %VeriFlow only focuses on ECs that might be influenced by the new update. 
-Next, VeriFlow builds a forwarding graph for each affected EC
+Next, VeriFlow builds a \emph{forwarding graph} for each EC \pbg{affected by the update,}
 by collecting forwarding rules influencing the EC. 
 %representing forwarding behaviors of packets belonging to those ECes.
-Lastly, VeriFlow traverses each of these graphs,
+Lastly, VeriFlow traverses each of these \pbg{graphs}
 to verify network-wide invariants.
-}
 
 Naively, to model network uncertainty, for every update, we need two graphs to symbolically represent the network behavior with and without the effect of the update for each influenced EC, until the controller is certain about the status of the update.
 %With that approach, 
@@ -242,7 +239,7 @@ Such a state-space explosion will result in a huge memory requirement and excess
 %to figure out what might go wrong.
 %Therefore, we need a more efficient way to represent all possible forwarding behaviors under uncertainty. 
 To address that, we efficiently model the network forwarding behavior %of each EC 
-as a \emph{uncertain forwarding graph}, in which links can be marked as {\em certain} or {\em uncertain}.
+as a \emph{uncertain forwarding graph}, \pbg{whose} links can be marked as {\em certain} or {\em uncertain}.
 %\mattc{shouldn't "rules" not "links" be uncertain? In fact, shouldn't uncertainty be a property for both?}
 %\mattc{You never said explicitly what uncertain links are, let me add it:}
 A forwarding link is {\em uncertain} if the controller does not yet have information on whether 
@@ -296,7 +293,10 @@ For example, an OpenFlow device typically handles an incoming packet with the hi
 In this way, the extra storage required for uncertainty modeling is linearly bounded by the number of uncertain rules.
 %, and so is the query time (\S\ref{sec:verify}). The reason is that in the worst case, there are $n$ parallel paths that need to be traversed, %instead of one without considering uncertainty, 
 %where $n$ is the number of concurrent uncertain rules.
-We next examine ``garbage collecting'' states from the graph, i.e., when one can confirm links as certain.
+\pbg{We next examine when we can resolve uncertainty, either confirming
+a link as certain or removing it.}
+
+%``garbage collecting'' states from the graph, i.e., when one can confirm links as certain.
 %That leads to the question of when it is possible to ``garbage collect'' state from the graph, i.e., when one can ``confirm'' links as being certain (\S\ref{sec:confirm}). \cut{We describe this issue in the next subsection.}
 
 \begin{figure}[!ht]
@@ -322,7 +322,7 @@ At first glance, one might think that could be done simply by marking forwarding
 %However, \cut{there is a tricky case we need to take into account.}
 %the challenge is we also need to model data packets in the network:
 %\cut{In particular, the problem is that}
-The problem with that approach is that it may result in inconsistencies from the data packets' perspective}
+The problem with that approach is that it may result in inconsistencies from the data packets' perspective.}
 %, e.g., even after a switch removes a rule, packets that had been processed by that rule might remain in flight.}
 Consider a network consisting of four switches, as in Figure~\ref{fig:filtermoving}. %consisting of four switches operated by an SDN controller, $s_1-s_4$ (Figure~\ref{fig:filtermoving}).
 %\cut{It is important to take into account these packets as well, as not doing so could introduce inconsistency issues.} \cut{-- for example, a new update installed with the assumption that all data in flight in the network is processed with existing rules could misroute or drop these existing packets, as it would not expect them to be in flight.}
@@ -357,7 +357,6 @@ to drop packets on $s_1$ instead of $s_3$.
 %Apparently, both the initial and final states preserve the policy.
 To perform the transition in a conservative way, the controller first adds a filtering rule on $s_1$ at $t_1$, then removes the filtering rule on $s_3$ at $t_2$, after the first rule addition has been confirmed.
 
-%Each of the forwarding graphs seems correct. 
 \kevin{The forwarding graphs at all steps seem correct.}
 However, if a packet enters $s_1$ before $t_1$ and reaches $s_3$ after $t_2$, 
 it will reach $s_4$, which violates the policy.
@@ -365,7 +364,7 @@ it will reach $s_4$, which violates the policy.
 \wxzcr{Traversal of a packet over the network is not atomic, 
 interleaving with network updates,
 as also observed in~\cite{Reitblatt2012}. 
-Moreover, it is recently proved that there are situations where no correct update order exists~\cite{bad-pkts}.}
+Moreover,~\cite{bad-pkts} recently proved that there are situations where no correct update order exists.}
 %Note that we are not the first to observe that problem~\cite{Reitblatt2012}.
 To deal with it, upon receiving an ack from the network, \name does not immediately mark the state of the corresponding 
 forwarding link as certain.
@@ -395,7 +394,7 @@ We have proved that our uncertainty-aware model is able to accurately
 capture the view of the network from the packets' perspective~\cite{gcc_tr},
 \wxzcr{even for in-flight packets that have been affected by rules not currently present}.
   \vspace{-0.1in}
-\begin{definition} A packet $P$'s view of the network is {\bf consistent} with
+\begin{definition} A packet $P$'s view of the network \pbg{{\bf agrees}} with
 the uncertainty-aware model, if at any time point during its traversal of the
 network, the data plane state that the packet encounters is in the model at
 that time point. More specifically, at time $t$, to $P$ if a link $l$
@@ -406,8 +405,8 @@ that time point. More specifically, at time $t$, to $P$ if a link $l$
   \vspace{-0.1in}
 
   \vspace{-0.1in}
-\begin{theorem} Assuming that \wxzcr{all data plane changes are initiated by the controller},
-any packet's view of the network is consistent with the uncertainty-aware model.
+\begin{theorem} Assuming that all data plane changes are initiated by the controller,
+any packet's view of the network \pbg{agrees} with the uncertainty-aware model.
 \end{theorem}
   \vspace{-0.1in}
 \if 0
