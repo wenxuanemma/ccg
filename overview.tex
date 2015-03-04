@@ -1,7 +1,7 @@
 %\section{Maximizing Parallelism}
 
 %\section{Customizable Consistency Constructor (\name)}
-\section{Customizable Consistency Generator}
+\section{Overview of \name}
 \label{sec:overview}
 
 %\wxzc{ 
@@ -34,10 +34,7 @@
 %
 %\label{sec:structure}
 
-\name works by converting the update scheduling problem into a network verification problem, in which arrows indicate flows of network messages (updates or acknowledges).  
-%To efficiently enforce consistency of network-wide invariants and policies as
-%network states evolve, we convert the complex update scheduling problem into a
-%well-defined network verification problem. 
+\pbg{\name converts the update scheduling problem into a network verification problem.} 
 Our overall approach is shown in Figure~\ref{fig:structure}.
 Our uncertainty-aware network model (\S\ref{sec:model}) provides a compact symbolic
 representation of the different possible states the network could be in,
@@ -48,7 +45,7 @@ providing input for the verification engine.
 %uncertainty-aware network model produces inputs for the verification engine, in
 %a manner that accurately captures the network uncertainty (\S\ref{sec:design}). 
 The verification engine is responsible for verifying 
-application updates against {\em any} specified
+application updates against \pbg{specified}
 invariants and policies (\S\ref{sec:verify}). 
 Based on verification results, \name synthesizes an
 efficient update plan to preserve policy consistency during network updates,
@@ -60,8 +57,8 @@ For example, one can
 %One key feature of \name is that as a platform, it
 %operates in a black-box fashion, offering a very flexible notion of
 %consistency. Therefore, one can 
-``plug in" a different verification
-function and an update scheduling tool to meet one's customized needs.
+``plug in'' a different verification
+function and a \pbg{fallback} update scheduling tool to meet one's customized needs.
 %A key feature of \name is that it runs both the verification engine and
 %the fallback mechanism in a black-box fashion.  That is, one can plug in
 %different checking functions and update tools to leverage the flexible support
