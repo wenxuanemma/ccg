@@ -40,6 +40,10 @@
 
 \usepackage[compact]{titlesec}
 
+\titlespacing\section{0pt}{2pt plus 2pt minus 2pt}{2pt plus 2pt minus 2pt}
+\titlespacing\subsection{0pt}{2pt plus 2pt minus 2pt}{2pt plus 2pt minus 2pt}
+\titlespacing\subsubsection{0pt}{2pt plus 2pt minus 2pt}{2pt plus 2pt minus 2pt}
+
 \pdfpagewidth=8.5 true in
 \pdfpageheight=11 true in
 
@@ -50,8 +54,8 @@
 
 \newcommand{\pbg}[1]{{\color{Green}#1}}
 %\newcommand{\pbg}[1]{{{#1}}} 
-\newcommand{\pbgc}[1]{{\color{Green}\bf\em{[pbg: #1]}}}
-%\newcommand{\pbgc}[1]{{}} 
+%\newcommand{\pbgc}[1]{{\color{Green}\bf\em{[pbg: #1]}}}
+\newcommand{\pbgc}[1]{{}} 
 
 %\newcommand{\matt}[1]{{\color{blue}{#1}}} 
 \newcommand{\matt}[1]{{{#1}}} 
@@ -74,9 +78,9 @@
 
 \newcommand{\cut}[1]{}
 % To make the FIXMEs go away, comment out this line...
-\newcommand{\fixme}[1]{{\bf\textcolor{red}{[#1]}}}
+%\newcommand{\fixme}[1]{{\bf\textcolor{red}{[#1]}}}
 % ...and uncomment this one.
-%\newcommand{\fixme}[1]{}
+\newcommand{\fixme}[1]{}
 
 \newcommand{\parheading}[1]{\medskip{} \noindent \textbf{#1}}
 
