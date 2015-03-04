@@ -43,7 +43,7 @@ The results also show strong scalability. As the number of concurrent uncertaint
 
 
 %\subsection{Performance Analysis during Network Changes}
-\subsection{Performance Analysis}
+\subsection{\pbg{Update} Performance Analysis}
 \label{sec:parallel}
 
 \subsubsection{Emulation-based Evaluation}
@@ -53,9 +53,9 @@ The results also show strong scalability. As the number of concurrent uncertaint
 We used Mininet to emulate a fat-tree network with a shortest path routing application and a load-balancing application in a NOX controller. The network consists of five core switches
 %\cut{fully connected with} 
 and ten edge switches, and each edge switch connects to five hosts. %To initialize the flow table for each switch, each host first picked up a random destination host to perform a file transfer. 
-We changed the network (e.g., add links, or migrate hosts) to trigger the controller to update the data plane with a set of new updates. 
+We \pbg{change} the network (e.g., add links, or migrate hosts) to trigger the controller to update the data plane with a set of new updates. 
 %Once the rules were stable in the switches, we changed the network (e.g., add links, or migrate hosts) to trigger the controller to update the data plane with a set of new updates. %We measured the delay that the new rules took to be applied to the network. 
-For each set of experiments, we tested six update mechanisms: (1) the controller immediately issues updates to the network, which is \textbf{Optimal} in terms of update speed; (2) \textbf{\name} with the basic connectivity invariant (loop and black-hole freedom) verification enabled (\name); (3) \name with an additional invariant that packets must traverse a specific middle hop before reaching the destination (\name-waypoint); (4) Consistent Updates (\textbf{CU})~\cite{Reitblatt2012}; (5) incremental Consistent Updates (\textbf{Incremental CU})~\cite{incremental-cu}; and (6) \textbf{Dionysus} \cite{jin2014dynamic} with its WCMP forwarding dependency graph generator.
+For each set of experiments, we tested six update mechanisms: (1) the controller immediately issues updates to the network, which is \textbf{Optimal} in terms of update speed; (2) \textbf{\name} with the basic connectivity invariants, loop and black-hole freedom, enabled (\name); (3) \name with an additional invariant that packets must traverse a specific middle hop before reaching the destination (\name-waypoint); (4) Consistent Updates (\textbf{CU})~\cite{Reitblatt2012}; (5) incremental Consistent Updates (\textbf{Incremental CU})~\cite{incremental-cu}; and (6) \textbf{Dionysus} \cite{jin2014dynamic} with its WCMP forwarding dependency graph generator.
 \wxznew{We configure our applications as the same type as in Dionysus, with
 forwarding rules matching exactly one flow, i.e., no overlapping forwarding
 graphs. Thus, loop and black-hole freedom are segment-independent as proved in
@@ -65,10 +65,8 @@ so the waypoint policy is also segment independent.}
 \wxzcr{A mix of old and new configurations, e.g., 
 $oldAB + newBC$ in Figure~\ref{fig:circular}(a), 
 is allowed by \name, but forbidden when using CU.}
-\wxzcrnew{Note here, we used our implementation of the algorithms introduced in Dionysus paper,
-which supports packet coherence.
-That is, with extra effort, one can develop algorithms that build customized dependency graphs 
-for weaker properties, and thus achieve better efficiency.}
+Note here, we used our \pbg{own} implementation of the algorithms introduced in Dionysus paper, \pbg{specifically the algorithm for packet coherence. Therefore, this is not a full evaluation of the Dionysus \emph{approach}: one can develop special-purpose algorithms that build customized dependency graphs for weaker properties, and thus achieve better efficiency. We leave
+such evaluation to future work.}
 
 %The CU we used was modified from an implementation developed at Stanford University \cite{standford_cu_imp}. Each experiment was repeated 10 times and we plotted the experimental results in the form of CDF. 
 
