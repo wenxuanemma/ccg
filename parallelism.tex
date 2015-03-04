@@ -551,24 +551,25 @@ and it has been proven that careful ordering of updates cannot always guarantee 
 %
 %Quantitative properties (with SWAN)                         
 
-\subsection{Consistency Preserving Network Synthesis}
+\subsection{Synthesis of Consistent Update Schedules}
 \label{sec:synthesis}
 
 \wxznew{ 
 %\cut{As discussed previously, there may be situations in which this
 %greedy algorithm gets stuck, i.e., some buffered updates never pass the
 %verification.  That may happen }
-When desired policies do not have the segment-independence property (\S\ref{sec:seg-independence}), it is possible that some buffered updates (through very rare in practice) never pass the verification.}
+When desired policies do not have the segment-independence property (\S\ref{sec:seg-independence}), it is possible that some buffered updates (through very rare in \pbg{our experiments}) never pass the verification.}
 %\cut{ using the greedy algorithm}
 For instance, consider a circular network with three nodes, in which each node
 has two types of rules: one type to forward packets to destinations directly connected to itself, and one default rule, which covers destinations connected to the other two switches. 
 Initially, default rules point clockwise. They later change to
-point counter clockwise. No matter which of the new default
+point \pbg{counterclockwise}. No matter which of the new default
 rules changes first, a loop is immediately caused for some destination. 
-\wxzcr{The loop freedom property is not segment-independent in this case, because that each default rule
-is shared by two flows (destined to two hosts),
+\wxzcr{The loop freedom property is not segment-independent in this case, because \pbg{each} default rule
+is shared by two \pbg{equivalence classes} (destined to two hosts),
 which results in conflicting dependencies among forwarding links.}
-To handle scenarios like that, 
+
+To handle \pbg{such} scenarios, 
 we adopt a hybrid approach (Algorithm 2).  If the network
 operators desire some policies that can be guaranteed by existing
 solutions, e.g., CU or SWAN, such solutions can be specified and plugged in as
@@ -581,20 +582,17 @@ policy is preserved. Updates that violate the policy are buffered temporarily.
 When the buffering time is over threshold $T$, configured by the operator,
 the fallback mechanism is triggered.
 The remaining updates are fed into $FB$ to be transformed to a feasible sequence, and then Algorithm 1 proceeds with them again to heuristically maximize update parallelism. 
-In that way, \name can always generate a consistent update sequence.
-%\cut{avoids getting stuck.}
-Alternatively, if no such external mechanism exists, 
-\kevinc{prefer to remove ``if no such external mechanism exists"} or the operators highly
-value update efficiency and prefer a best effort mechanism to maintain consistency
-during updates, no fallback would be triggered and no
-$FB$ would be provided to the algorithm.  Instead, after a
-configurable threshold of time, buffered commands are released to the network.
-\wxzcr{Thus, all updates are guaranteed to be issued eventually either way.}
+In that way, \name can always generate a consistent update sequence, \pbg{\emph{assuming a fallback mechanism exists which can guarantee the
+desired invariants}.}\footnote{\pbg{If no appropriate fallback exists,
+and the invariant is non-segment-independent, \name can no longer guarantee the invariant.  In this case, \name can offer a ``best effort'' mechanism to maintain consistency
+during updates by simply releasing buffered updates to the network after a
+configurable threshold of time.  This approach might even be preferable for certain invariants where operators highly
+value update efficiency; we leave an evaluation to future work.}}
 %Such design gives operators a flexible choice on how to balance the trade-off between efficiency and consistency.
 \wxzcr{Note that even with $FB$ triggered, \name achieves better efficiency 
 than using $FB$ alone to update the network,
 because: 1) in the common case, most of updates are not handled by $FB$;
-2) \name only uses $FB$ to "translate" buffered updates and then 
+2) \name only uses $FB$ to ``translate'' buffered updates and then 
 heuristically parallelize issuing the output of $FB$, 
 but doesn't wait explicitly as some $FB$ mechanism does, e.g., the waiting time between two phases in CU.}
 
@@ -631,9 +629,9 @@ To show the feasibility of that approach,
 \kevin{we implemented both CU \cite{Reitblatt2012} (see \S\ref{sec:eval}) and SWAN \cite{Hong13} as our fallback mechanisms in \name.}
 %\cut{The integration with CU is thoroughly evaluated in \S\ref{sec:eval}, and here, we focus on the one with SWAN. } 
 %We verified congestion-free invariants of 
-We emulated traffic engineering (TE) and failure recovery (FR), similar to Dionysus \cite{jin2014dynamic}, in the network shown in Figure \ref{fig:swan_topo}. Network updates were synthesized to preserve congestion-free property using \name (with SWAN as plug-in), and for comparison, using SWAN alone. In the TE case, we changed the network traffic to trigger new routing updates to match the traffic. In the FR case, we turned down the link S3-S8 so that link S1-S8 was overloaded. Then the FR application computed new updates to balance the traffic.
+We emulated traffic engineering (TE) and failure recovery (FR), similar to Dionysus \cite{jin2014dynamic}, in the network shown in Figure \ref{fig:swan_topo}. Network updates were synthesized to preserve \pbg{congestion-freeness} using \name (with SWAN as plug-in), and for comparison, using SWAN alone. In the TE case, we changed the network traffic to trigger new routing updates to match the traffic. In the FR case, we turned down the link S3-S8 so that link S1-S8 was overloaded. Then the FR application computed new updates to balance the traffic.
  %and eventually eliminate the link overload. 
-The detailed events that occurred at all eight switches are depicted in Figure \ref{fig:bw}. We see that \name ensured the same consistency level, but greatly enhanced parallelism, and thus achieved significant speed improvement (1.95x faster in the TE case, and 1.97x faster in the FR case).
+The detailed events that occurred at all eight switches are depicted in Figure \ref{fig:bw}. We see that \name ensured the same consistency level, but greatly enhanced parallelism, and thus achieved significant speed improvement ($1.95\times$ faster in the TE case, and $1.97\times$ faster in the FR case).
 
 \begin{figure}[!ht]
   \centering
