@@ -11,24 +11,14 @@
 
 Network operators often establish a set of correctness conditions to ensure 
 successful operation of the network, such as
-%Some of those are manually expressed in \wxzcr{configuration files}, such as
-%the form of policies, i.e.,
-%configurable rules, or regulations on how the network should behave
 the preference of one path over another, the prevention of untrusted traffic
 from entering a secure zone,
-%Others are deemed so obvious they are ``baked in"
-%to protocols, such as 
 or loop and black hole avoidance. As networks become an increasingly crucial backbone for
 critical services,
-%such as the power grid, medical networks, military and
-%rescue operations, and financial services, and as network operators face
-%increasing regulatory requirements on correctness and security
-%properties of data transport (e.g., data isolation as in HIPAA, Sarbanes-Oxley,
-%etc.), 
 the ability to construct networks that obey correctness criteria is becoming
 even more important. 
-\wxznew{Moreover, as modern networks are in a constant state of changing, it is critical
-to keep them correct even during transitions.}
+Moreover, as modern networks are \pbg{continually changing, it is critical
+for them to be} correct even during transitions.
 %Unfortunately, today's approach of instilling policies on networks is an
 %error-prone process. Operators need to program policies into networks via
 %indirect mechanisms (low-level configuration commands on routers), and must
@@ -42,12 +32,9 @@ to keep them correct even during transitions.}
 %out when things go wrong, but humans are still involved in the repair process,
 %lengthening the time to fix the problem, and introducing potential faults
 %during the process.%As networks are dynamic, it is even harder to keep them working correctly.
-\wxzcrnew{Thus, the challenge is to guarantee correct transitions, i.e., 
-properties are preserved consistently over time, which has been referred as 
-%Thus, the challenge is to preserve properties even during
-%network state transitions, which we refer to as maintaining 
-{\em network consistency}~\cite{Reitblatt2012}.} 
-\fixme{This sounds like we came up with the term.  Also this sounds more like correctness than consistency.}
+\pbg{Thus, a key challenge is to guarantee that properties are preserved during
+transitions from one correct configuration to a new correct configuration,
+which has been referred as {\em network consistency}~\cite{Reitblatt2012}.}
 
 Several recent proposed systems~\cite{Reitblatt2012,incremental-cu,zUpdate, Hong13}
 consistently update software-defined networks (SDNs), 
@@ -108,7 +95,7 @@ Might a verifier serve as a guide through the search space of possible update se
 %any update is safe to pass to the network at any particular moment by checking
 %the supplied invariants. 
 
-Based on that insight, we propose a new consistent update system, 
+Based on that insight, we propose a new consistent update system, \pbg{the} 
 Customizable Consistency Generator (\name), which efficiently and consistently updates
 SDNs under customizable properties (invariants), intuitively by converting the scheduling synthesis problem
 to a series of network verification problems.
